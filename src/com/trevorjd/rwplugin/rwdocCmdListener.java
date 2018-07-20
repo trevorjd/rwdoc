@@ -7,11 +7,13 @@ import net.risingworld.api.events.player.PlayerKeyEvent;
 import net.risingworld.api.events.player.gui.PlayerGuiElementClickEvent;
 import net.risingworld.api.gui.GuiElement;
 import net.risingworld.api.gui.GuiImage;
-import net.risingworld.api.gui.GuiPanel;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.KeyInput;
 
-import static com.trevorjd.rwplugin.mainGUI.showHideGUI;
+import static com.trevorjd.rwplugin.mainGUI.toggleFrontPage;
+import static com.trevorjd.rwplugin.mainGUI.toggleGUI;
+import static com.trevorjd.rwplugin.rwdoc.plugin;
+import static com.trevorjd.rwplugin.rwdocUtils.*;
 
 public class rwdocCmdListener implements Listener
 {
@@ -23,13 +25,14 @@ public class rwdocCmdListener implements Listener
         if (cmd[0].equals(rwdoc.c.getProperty("rwdocCommand")))
         {
             System.out.println("rwdoc Debug: command entered. Displaying GUI");
-            showHideGUI(player, true);
+            toggleGUI(player, true);
 
             String eol = System.getProperty("line.separator");
-            menuGui.setMenuLabelText(rwdoc.plugin, player, "Server Rules" + eol + "Land Protection" + eol + "Building" + eol + "Animal Management" + eol + "Transportation" + eol + "Web Forum");
+            updateGUI.setMenuListItems(plugin, player, "Server Rules" + eol + "Land Protection" + eol + "Building" + eol + "Animal Management" + eol + "Transportation" + eol + "Web Forum");
 
-            String s = "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.";
-            menuGui.setBodyTextLabel(rwdoc.plugin, player,rwdocUtils.wordWrap(s));
+            String s = "Welcome to our server!";
+            updateGUI.setPageBodyRight(plugin, player, s);
+
             player.setMouseCursorVisible(true);
         }
     }
@@ -40,36 +43,34 @@ public class rwdocCmdListener implements Listener
         Player player = event.getPlayer();
         GuiElement element = event.getGuiElement();
         System.out.println("rwdoc Debug: I got a click!");
-        GuiPanel panel = (GuiPanel) player.getAttribute("pTextPanel");
-        System.out.println("rwdoc Debug: panelWidth = " + panel.getWidth());
-        if (element == (GuiImage) player.getAttribute("pButtonClose"))
+        if (element == (GuiImage) player.getAttribute("iButtonClose"))
         {
-            showHideGUI(player,false);
+            System.out.println("rwdoc Debug: I got a Close click!");
+            toggleGUI(player,false);
             player.setMouseCursorVisible(false);
         }
 
-        if (element == (GuiImage) player.getAttribute("pButtonFontScaleUp"))
+        if (element == (GuiImage) player.getAttribute("iNavUp"))
         {
-            int fontSize;
-            System.out.println("rwdoc Debug: Scaling Up");
-            if (player.hasAttribute("FontSize"))
-            {
-                fontSize = (int) player.getAttribute("FontSize");
-            } else fontSize = 20;
-            player.setAttribute("FontSize", fontSize + 1 );
-            mainGUI.refreshDisplay(player);
+            System.out.println("rwdoc Debug: Page turn - up.");
+            updateGUI.setPageBodyRight(plugin, player, getDefaultWelcome(), 0.65f, 0.5f);
+            updateGUI.updatePageTitleRight(plugin, player, "");
+            toggleFrontPage(player,true);
         }
 
-        if (element == (GuiImage) player.getAttribute("pButtonFontScaleDown"))
+        if (element == (GuiImage) player.getAttribute("iNavLeft"))
         {
-            int fontSize;
-            System.out.println("rwdoc Debug: Scaling Down");
-            if (player.hasAttribute("FontSize"))
-            {
-                fontSize = (int) player.getAttribute("FontSize");
-            } else fontSize = 20;
-            player.setAttribute("FontSize", fontSize - 1 );
-            mainGUI.refreshDisplay(player);
+            System.out.println("rwdoc Debug: Page turn - left.");
+        }
+
+        if (element == (GuiImage) player.getAttribute("iNavRight"))
+        {
+            System.out.println("rwdoc Debug: Page turn - right.");
+            updateGUI.setPageBodyLeft(plugin, player, getBluePrintInfo());
+            updateGUI.setPageBodyRight(plugin, player,getLoremIpsum());
+            updateGUI.updatePageTitleRight(plugin, player, "Lorem to the Ipsum!");
+            updateGUI.updatePageTitleLeft(plugin, player, getDefaultTitle());
+            toggleFrontPage(player,false);
         }
     }
 
@@ -80,18 +81,7 @@ public class rwdocCmdListener implements Listener
         System.out.println("rwdoc Debug: I got a key!");
         if(event.getKeyCode() == KeyInput.KEY_Y && event.isPressed())
         {
-            if ((boolean) player.getAttribute("guiVisible"))
-            {
-                System.out.println("rwdoc Debug: Keypress - Hiding GUI");
-                showHideGUI(player,false);
-                player.setMouseCursorVisible(false);
-            }
-            else
-            {
-                System.out.println("rwdoc Debug: Keypress - Showing GUI");
-                showHideGUI(player,true);
-                player.setMouseCursorVisible(true);
-            }
+
         }
     }
 }

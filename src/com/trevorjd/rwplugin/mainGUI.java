@@ -15,100 +15,65 @@ public class mainGUI
     {
         //do something
         GuiPanel pMainPanel = createMainPanel();
-        GuiPanel pTitlePanel = createTitlePanel();
-        GuiPanel pMenuPanel = createMenuPanel();
-        GuiPanel pTextPanel = createTextPanel();
-        GuiPanel pFooterPanel = createFooterPanel();
-        GuiPanel pSideBar = createSideBar();
 
-        GuiLabel pMainTitle = createTitleLabel();
-        GuiLabel pMenuLabel = createMenuLabel();
-        GuiLabel pTextLabel = createTextLabel();
+        GuiLabel lPageTitleL = createPageTitle();
+        GuiLabel lPageTitleR = createPageTitle();
+        GuiLabel lMenuList = createMenuList();
+        GuiLabel lPageBodyL = createPageBody();
+        GuiLabel lPageBodyR = createPageBody();
 
-        GuiImage pNavLeft = createNavLeft();
-        GuiImage pNavUp = createNavUp();
-        GuiImage pNavRight = createNavRight();
-        GuiImage pButtonUp = createButtonUp();
-        GuiImage pButtonDown = createButtonDown();
-        GuiImage pButtonClose = createButtonClose();
-        GuiImage pButtonFontScaleUp = createButtonFontScaleUp();
-        GuiImage pButtonFontScaleDown = createButtonFontScaleDown();
+        GuiImage iJournal = createJournal();
+        GuiImage iJournal_Left = createJournal_Left();
+        GuiImage iNavLeft = createNavLeft();
+        GuiImage iNavRight = createNavRight();
+        GuiImage iNavUp = createNavUp();
+        GuiImage iButtonClose = createButtonClose();
 
         //if your element is a label or child to the panel you also need to call the .addChild Method here e.g.
-        pMenuPanel.addChild(pMenuLabel);
-
-        pTextPanel.addChild(pTextLabel);
-
-        pTitlePanel.addChild(pMainTitle);
-        pTitlePanel.addChild(pButtonClose);
-        pTitlePanel.addChild(pButtonFontScaleUp);
-        pTitlePanel.addChild(pButtonFontScaleDown);
-
-        pFooterPanel.addChild(pNavLeft);
-        pFooterPanel.addChild(pNavUp);
-        pFooterPanel.addChild(pNavRight);
-
-        pSideBar.addChild(pButtonUp);
-        pSideBar.addChild(pButtonDown);
-
+        pMainPanel.addChild(iJournal);
+        pMainPanel.addChild(iJournal_Left);
+        iJournal.addChild(lPageTitleL);
+        iJournal.addChild(lPageTitleR);
+        iJournal_Left.addChild(lMenuList);
+        iJournal.addChild(lPageBodyL);
+        iJournal.addChild(lPageBodyR);
+        iJournal.addChild(iNavLeft);
+        iJournal.addChild(iNavRight);
+        iJournal.addChild(iNavUp);
+        iJournal.addChild(iButtonClose);
 
         player.setAttribute("pMainPanel", pMainPanel);
-        player.setAttribute("pTitlePanel", pTitlePanel);
-        player.setAttribute("pMenuPanel", pMenuPanel);
-        player.setAttribute("pTextPanel", pTextPanel);
-        player.setAttribute("pFooterPanel", pFooterPanel);
-        player.setAttribute("pSideBar", pSideBar);
-        player.setAttribute("pMainTitle", pMainTitle);
-        player.setAttribute("pMenuLabel", pMenuLabel);
-        player.setAttribute("pTextLabel", pTextLabel);
-        player.setAttribute("pNavLeft", pNavLeft);
-        player.setAttribute("pNavUp", pNavUp);
-        player.setAttribute("pNavRight", pNavRight);
-        player.setAttribute("pButtonUp", pButtonUp);
-        player.setAttribute("pButtonDown", pButtonDown);
-        player.setAttribute("pButtonClose", pButtonClose);
-        player.setAttribute("pButtonFontScaleUp", pButtonFontScaleUp);
-        player.setAttribute("pButtonFontScaleDown", pButtonFontScaleDown);
+        player.setAttribute("lPageTitleL", lPageTitleL);
+        player.setAttribute("lPageTitleR", lPageTitleR);
+        player.setAttribute("lMenuList", lMenuList);
+        player.setAttribute("lPageBodyL", lPageBodyL);
+        player.setAttribute("lPageBodyR", lPageBodyR);
+        player.setAttribute("iJournal", iJournal);
+        player.setAttribute("iJournal_Left", iJournal_Left);
+        player.setAttribute("iNavLeft", iNavLeft);
+        player.setAttribute("iNavRight", iNavRight);
+        player.setAttribute("iNavUp", iNavUp);
+        player.setAttribute("iButtonClose", iButtonClose);
 
         player.addGuiElement((GuiPanel) player.getAttribute("pMainPanel"));
-        player.addGuiElement((GuiPanel) player.getAttribute("pTitlePanel"));
-        player.addGuiElement((GuiPanel) player.getAttribute("pMenuPanel"));
-        player.addGuiElement((GuiPanel) player.getAttribute("pTextPanel"));
-        player.addGuiElement((GuiPanel) player.getAttribute("pFooterPanel"));
-        player.addGuiElement((GuiPanel) player.getAttribute("pSideBar"));
-        player.addGuiElement((GuiLabel) player.getAttribute("pMainTitle"));
-        player.addGuiElement((GuiLabel) player.getAttribute("pMenuLabel"));
-        player.addGuiElement((GuiLabel) player.getAttribute("pTextLabel"));
-        player.addGuiElement((GuiImage) player.getAttribute("pNavLeft"));
-        player.addGuiElement((GuiImage) player.getAttribute("pNavUp"));
-        player.addGuiElement((GuiImage) player.getAttribute("pNavRight"));
-        player.addGuiElement((GuiImage) player.getAttribute("pButtonUp"));
-        player.addGuiElement((GuiImage) player.getAttribute("pButtonDown"));
-        player.addGuiElement((GuiImage) player.getAttribute("pButtonClose"));
-        player.addGuiElement((GuiImage) player.getAttribute("pButtonFontScaleUp"));
-        player.addGuiElement((GuiImage) player.getAttribute("pButtonFontScaleDown"));
-    }
-
-    private static int scaleFont(int fontsize)
-    {
-        double scaled = fontsize * Double.valueOf(c.getProperty("guiSIZE_Y"));
-        return (int) scaled;
+        player.addGuiElement((GuiLabel) player.getAttribute("lPageTitleL"));
+        player.addGuiElement((GuiLabel) player.getAttribute("lPageTitleR"));
+        player.addGuiElement((GuiLabel) player.getAttribute("lMenuList"));
+        player.addGuiElement((GuiLabel) player.getAttribute("lPageBodyL"));
+        player.addGuiElement((GuiLabel) player.getAttribute("lPageBodyR"));
+        player.addGuiElement((GuiImage) player.getAttribute("iJournal"));
+        player.addGuiElement((GuiImage) player.getAttribute("iJournal_Left"));
+        player.addGuiElement((GuiImage) player.getAttribute("iNavLeft"));
+        player.addGuiElement((GuiImage) player.getAttribute("iNavRight"));
+        player.addGuiElement((GuiImage) player.getAttribute("iNavUp"));
+        player.addGuiElement((GuiImage) player.getAttribute("iButtonClose"));
     }
 
     // Some vars to help with gui element positioning. This is doing my head in.
-    private static Float LeftM = Float.valueOf(c.getProperty("guiSIZE_X")) / 2f; // half the gui width
-    private static Float BottomM = Float.valueOf(c.getProperty("guiSIZE_Y")) / 2f; // half the gui height
+    private static Float LeftM = (1.0f - Float.valueOf(c.getProperty("guiSIZE_X"))) / 2f;
+    private static Float BottomM = (1.0f - Float.valueOf(c.getProperty("guiSIZE_Y"))) / 2f;
     private static Float GuiWidth = Float.valueOf(c.getProperty("guiSIZE_X"));
     private static Float GuiHeight = Float.valueOf(c.getProperty("guiSIZE_Y"));
-    private static Float TitleWidth = GuiWidth;
-    private static Float TitleHeight = Float.valueOf(c.getProperty("guiSIZE_Y")) * 0.1f; // 10% of gui height
-    private static Float FooterWidth = GuiWidth;
-    private static Float FooterHeight = Float.valueOf(c.getProperty("guiSIZE_Y")) * 0.1f; // 10% of gui height
-    private static Float SidebarWidth = Float.valueOf(c.getProperty("guiSIZE_X")) * 0.05f; // 5% of gui width
-    private static Float SidebarHeight = GuiHeight - TitleHeight - FooterHeight;
-    private static Float MenuWidth = Float.valueOf(c.getProperty("guiSIZE_X")) * 0.30f; // 20% of gui width
-    private static Float TextWidth = Float.valueOf(c.getProperty("guiSIZE_X")) * 0.65f; // 20% of gui width
-    private static Float TextPadding = 0.05f;
     private static int guiBgColor = 0x30201370;
 
     private static GuiPanel createMainPanel()
@@ -120,130 +85,50 @@ public class mainGUI
                 GuiWidth,
                 GuiHeight,
                 true);
-        element.setColor(guiBgColor);
-        element.setBorderColor(0x6e6259FF); //red
-        element.setBorderThickness(5, false);
+        element.setColor(0x00000000);
+        element.setBorderColor(0x00000000);
+        element.setBorderThickness(0, false);
         element.setVisible(false);
         return element;
     }
 
-    private static GuiPanel createTitlePanel()
-    {
-        GuiPanel element = new GuiPanel(
-                LeftM,
-                BottomM + GuiHeight - TitleHeight,
-                true,
-                TitleWidth,
-                TitleHeight,
+    private static GuiLabel createPageTitle(){
+        GuiLabel element = new GuiLabel(c.getProperty(""),
+                0.10f,
+                0.92f,
                 true);
-        element.setColor(guiBgColor);
-        //element.setBorderColor(0xFF0000FF); //red
-        //element.setBorderThickness(1, false);
+        element.setFontSize(15);
+        element.setFontColor(0x302013FF);
+        element.setColor(0xFF070700); //red
         element.setVisible(false);
         return element;
     }
 
-
-    private static GuiPanel createFooterPanel()
-    {
-        GuiPanel element = new GuiPanel(
-                LeftM,
-                BottomM,
-                true,
-                FooterWidth,
-                FooterHeight,
-                true);
-        element.setColor(guiBgColor);
-        //element.setBorderColor(0xFFFF00FF); //yellow
-        //element.setBorderThickness(1, false);
-        element.setVisible(false);
-        return element;
-    }
-
-    private static GuiPanel createMenuPanel()
-    {
-        GuiPanel element = new GuiPanel(
-                LeftM,
-                BottomM + FooterHeight,
-                true,
-                MenuWidth,
-                GuiHeight - FooterHeight - TitleHeight,
-                true);
-        element.setColor(guiBgColor);
-        //element.setBorderColor(0x00FF00FF); // green
-        //element.setBorderThickness(1, false);
-        element.setVisible(false);
-        return element;
-    }
-
-    private static GuiPanel createTextPanel()
-    {
-        GuiPanel element = new GuiPanel(
-                LeftM + MenuWidth,
-                BottomM + FooterHeight,
-                true,
-                TextWidth,
-                GuiHeight - FooterHeight - TitleHeight,
-                true);
-        element.setColor(guiBgColor);
-        //element.setBorderColor(0x0000FFFF); //blue
-        //element.setBorderThickness(1, false);
-        element.setVisible(false);
-        return element;
-    }
-
-    private static GuiPanel createSideBar()
-    {
-        GuiPanel element = new GuiPanel(
-                LeftM + GuiWidth - SidebarWidth,
-                BottomM,
-                true,
-                SidebarWidth,
-                SidebarHeight,
-                true);
-        element.setColor(guiBgColor);
-        //element.setBorderColor(0x00FFFFFF); // cyan
-        //element.setBorderThickness(1, false);
-        element.setVisible(false);
-        return element;
-    }
-
-    private static GuiLabel createTitleLabel(){
-        GuiLabel element = new GuiLabel(c.getProperty("guiTitle"),
-                0.25f,
-                0.25f,
-                true);
-        element.setFontSize(20);
-        element.setFontColor(0xFFFFFFFF);
-        //element.setColor(0x07070790); //grey
-        element.setVisible(false);
-        return element;
-    }
-
-    private static GuiLabel createMenuLabel(){
+    private static GuiLabel createMenuList(){
         GuiLabel element = new GuiLabel(c.getProperty("Menu"),
-                TextPadding / 2,
-                1.0f - TextPadding,
+                GuiWidth * 0.15f,
+                0.9f,
                 true);
         element.setPivot(PivotPosition.TopLeft);
-        element.setFontSize(20);
-        element.setFontColor(Long.decode(c.getProperty("guiFontColor")).intValue());
-        //element.setColor(0x07FF0710);
+        element.setFontSize(40);
+        //element.setFontColor(Long.decode(c.getProperty("guiFontColor")).intValue());
+        element.setFontColor(0x302013FF);
+        element.setColor(0x07FF0700); //green
         element.setClickable(true);
         element.setVisible(false);
         return element;
     }
 
-    private static GuiLabel createTextLabel(){
-        GuiLabel element = new GuiLabel(c.getProperty("Text me, baby!"),
-                TextPadding / 2 ,
-                1.0f - TextPadding,
+    private static GuiLabel createPageBody(){
+        GuiLabel element = new GuiLabel(c.getProperty("default text"),
+                GuiWidth * 0.65f ,
+                0.9f,
                 true);
         element.setPivot(PivotPosition.TopLeft);
-        element.setFontSize(20);
-        element.setFontColor(Long.decode(c.getProperty("guiFontColor")).intValue());
-        //element.setFontColor(0xFFFFFFFF);
-        //element.setColor(0x0707FF10);
+        element.setFontSize(22);
+        //element.setFontColor(Long.decode(c.getProperty("guiFontColor")).intValue());
+        element.setFontColor(0x302013FF);
+        element.setColor(0x0707FF00);
         element.setVisible(false);
         return element;
     }
@@ -252,11 +137,11 @@ public class mainGUI
         System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageNavLeft"));
         ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageNavLeft"));
         GuiImage element = new GuiImage(ii,
-                0.1f,
-                0.1f,
+                0.02f,
+                0.05f,
                 true,
+                0.15f,
                 0.1f,
-                0.8f,
                 true);
         element.setClickable(true);
         element.setVisible(false);
@@ -268,10 +153,10 @@ public class mainGUI
         ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageNavRight"));
         GuiImage element = new GuiImage(ii,
                 0.85f,
-                0.1f,
+                0.05f,
                 true,
+                0.15f,
                 0.1f,
-                0.8f,
                 true);
         element.setVisible(false);
         element.setClickable(true);
@@ -279,44 +164,14 @@ public class mainGUI
     }
 
     private static GuiImage createNavUp(){
-        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageNavUp"));
+        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageNavRight"));
         ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageNavUp"));
         GuiImage element = new GuiImage(ii,
-                0.5f,
-                0.1f,
+                0.48f,
+                0.05f,
                 true,
-                0.1f,
-                0.8f,
-                true);
-        element.setVisible(false);
-        element.setClickable(true);
-        return element;
-    }
-
-    private static GuiImage createButtonUp(){
-        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonUp"));
-        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonUp"));
-        GuiImage element = new GuiImage(ii,
-                0.1f,
-                0.8f,
-                true,
-                0.8f,
-                0.06f,
-                true);
-        element.setVisible(false);
-        element.setClickable(true);
-        return element;
-    }
-
-    private static GuiImage createButtonDown(){
-        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonDown"));
-        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonDown"));
-        GuiImage element = new GuiImage(ii,
-                0.1f,
-                0.15f,
-                true,
-                0.8f,
-                0.06f,
+                0.07f,
+                0.2f,
                 true);
         element.setVisible(false);
         element.setClickable(true);
@@ -327,105 +182,83 @@ public class mainGUI
         System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonClose"));
         ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonClose"));
         GuiImage element = new GuiImage(ii,
-                0.95f,
-                0.2f,
+                0.91f,
+                0.9f,
                 true,
-                0.04f,
-                0.6f,
+                0.06f,
+                0.1f,
                 true);
         element.setVisible(false);
         element.setClickable(true);
         return element;
     }
 
-    private static GuiImage createButtonFontScaleUp(){
-        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonFontScaleUp"));
-        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonFontScaleUp"));
+    private static GuiImage createJournal(){
+        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("bgImageJournal"));
+        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("bgImageJournal"));
         GuiImage element = new GuiImage(ii,
-                0.89f,
-                0.2f,
+                0.0f,
+                0.0f,
                 true,
-                0.05f,
-                0.6f,
+                1.0f,
+                1.0f,
                 true);
         element.setVisible(false);
-        element.setClickable(true);
+        element.setClickable(false);
         return element;
     }
 
-    private static GuiImage createButtonFontScaleDown(){
-        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonFontScaleDown"));
-        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("imageButtonFontScaleDown"));
+    private static GuiImage createJournal_Left(){
+        System.out.println("rwdoc Debug: path = " + c.getProperty("rwdocImgLoc") + c.getProperty("bgImageJournal_Left"));
+        ImageInformation ii = new ImageInformation(c.getProperty("rwdocImgLoc") + c.getProperty("bgImageJournal_Left"));
         GuiImage element = new GuiImage(ii,
-                0.83f,
-                0.2f,
+                0.0f,
+                0.0f,
                 true,
-                0.05f,
-                0.6f,
+                0.5f,
+                1.0f,
                 true);
         element.setVisible(false);
-        element.setClickable(true);
+        element.setClickable(false);
         return element;
     }
 
-    protected static void showHideGUI(Player player, boolean value)
+    protected static void toggleGUI(Player player, boolean value)
     {
-        System.out.println("rwdoc Debug: GUI visible: " + value);
         GuiPanel pMainPanel = (GuiPanel) player.getAttribute("pMainPanel");
-        GuiPanel pTitlePanel = (GuiPanel) player.getAttribute("pTitlePanel");
-        GuiPanel pMenuPanel = (GuiPanel) player.getAttribute("pMenuPanel");
-        GuiPanel pTextPanel = (GuiPanel) player.getAttribute("pTextPanel");
-        GuiPanel pFooterPanel = (GuiPanel) player.getAttribute("pFooterPanel");
-        GuiPanel pSideBar = (GuiPanel) player.getAttribute("pSideBar");
-
-        GuiLabel pMainTitle = (GuiLabel) player.getAttribute("pMainTitle");
-        GuiImage pButtonFontScaleUp = (GuiImage) player.getAttribute("pButtonFontScaleUp");
-        GuiImage pButtonFontScaleDown = (GuiImage) player.getAttribute("pButtonFontScaleDown");
-
-        GuiLabel pMenuLabel = (GuiLabel) player.getAttribute("pMenuLabel");
-        GuiLabel pTextLabel = (GuiLabel) player.getAttribute("pTextLabel");
-
-        GuiImage pNavLeft = (GuiImage) player.getAttribute("pNavLeft");
-        GuiImage pNavUp = (GuiImage) player.getAttribute("pNavUp");
-        GuiImage pNavRight = (GuiImage) player.getAttribute("pNavRight");
-
-        GuiImage pButtonUp = (GuiImage) player.getAttribute("pButtonUp");
-        GuiImage pButtonDown = (GuiImage) player.getAttribute("pButtonDown");
-        GuiImage pButtonClose = (GuiImage) player.getAttribute("pButtonClose");
+        GuiLabel lPageTitleL = (GuiLabel) player.getAttribute("lPageTitleL");
+        GuiLabel lPageTitleR = (GuiLabel) player.getAttribute("lPageTitleR");
+        GuiLabel lMenuList = (GuiLabel) player.getAttribute("lMenuList");
+        GuiLabel lPageBodyL = (GuiLabel) player.getAttribute("lPageBodyL");
+        GuiLabel lPageBodyR = (GuiLabel) player.getAttribute("lPageBodyR");
+        GuiImage iJournal = (GuiImage) player.getAttribute("iJournal");
+        GuiImage iJournal_Left = (GuiImage) player.getAttribute("iJournal_Left");
+        GuiImage iNavLeft = (GuiImage) player.getAttribute("iNavLeft");
+        GuiImage iNavRight = (GuiImage) player.getAttribute("iNavRight");
+        GuiImage iNavUp = (GuiImage) player.getAttribute("iNavUp");
+        GuiImage iButtonClose = (GuiImage) player.getAttribute("iButtonClose");
 
         pMainPanel.setVisible(value);
-        pTitlePanel.setVisible(value);
-        pMenuPanel.setVisible(value);
-        pTextPanel.setVisible(value);
-        pFooterPanel.setVisible(value);
-        pSideBar.setVisible(value);
-
-        pMainTitle.setVisible(value);
-        pButtonClose.setVisible(value);
-        pButtonFontScaleUp.setVisible(value);
-        pButtonFontScaleDown.setVisible(value);
-
-        pMenuLabel.setVisible(value);
-        pTextLabel.setVisible(value);
-
-        pNavLeft.setVisible(value);
-        pNavUp.setVisible(value);
-        pNavRight.setVisible(value);
-
-        pButtonUp.setVisible(value);
-        pButtonDown.setVisible(value);
+        lPageTitleL.setVisible(value);
+        lPageTitleR.setVisible(value);
+        lMenuList.setVisible(value);
+        lPageBodyL.setVisible(value);
+        lPageBodyR.setVisible(value);
+        iJournal.setVisible(value);
+        iJournal_Left.setVisible(value);
+        iNavLeft.setVisible(value);
+        iNavRight.setVisible(value);
+        iNavUp.setVisible(value);
+        iButtonClose.setVisible(value);
 
         player.setAttribute("guiVisible", value);
     }
 
-    protected static void refreshDisplay(Player player)
+    protected static void toggleFrontPage(Player player, boolean value)
     {
-        System.out.println("rwdoc Debug: Refreshing display.");
-        GuiLabel guiLabel = (GuiLabel) player.getAttribute("pTextLabel");
-        String string = guiLabel.getText();
-        int fontSize = (int) player.getAttribute("FontSize");
-        // rwdocUtils.stoneFontSize(player);
-        guiLabel.setFontSize(fontSize);
-        guiLabel.setText(rwdocUtils.wordWrap(rwdocUtils.stripNewlines(string)));
+        GuiImage iJournal_Left = (GuiImage) player.getAttribute("iJournal_Left");
+        iJournal_Left.setVisible(value);
+
+        player.setAttribute("frontPageVisible", value);
     }
 }

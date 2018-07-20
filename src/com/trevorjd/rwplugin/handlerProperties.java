@@ -17,22 +17,17 @@ public class handlerProperties
         config.setProperty("rwdocDocsDir", "/" + p.getProperty("rwdocDocsDir"));
         config.setProperty("rwdocCommand", "/" + p.getProperty("rwdocCommand"));
         config.setProperty("rwdocImgLoc", plugin.getPath() + "/" + p.getProperty("rwdocImgLoc") + "/");
-        config.setProperty("guiPOS_X", p.getProperty("guiPOS_X"));
-        config.setProperty("guiPOS_Y", p.getProperty("guiPOS_Y"));
-        config.setProperty("guiSIZE_X", p.getProperty("guiSIZE_X"));
-        config.setProperty("guiSIZE_Y", p.getProperty("guiSIZE_Y"));
-        config.setProperty("guiTitle", p.getProperty("guiTitle"));
+        config.setProperty("guiSIZE_X", "0.85");
+        config.setProperty("guiSIZE_Y", "0.85");
         config.setProperty("guiFontColor", p.getProperty("guiFontColor"));
         config.setProperty("guiBorderColor", p.getProperty("guiBorderColor"));
         config.setProperty("guiLabelColor", p.getProperty("guiLabelColor"));
         config.setProperty("imageNavLeft", p.getProperty("imageNavLeft"));
         config.setProperty("imageNavRight", p.getProperty("imageNavRight"));
         config.setProperty("imageNavUp", p.getProperty("imageNavUp"));
-        config.setProperty("imageButtonUp", p.getProperty("imageButtonUp"));
-        config.setProperty("imageButtonDown", p.getProperty("imageButtonDown"));
         config.setProperty("imageButtonClose", p.getProperty("imageButtonClose"));
-        config.setProperty("imageButtonFontScaleUp", p.getProperty("imageButtonFontScaleUp"));
-        config.setProperty("imageButtonFontScaleDown", p.getProperty("imageButtonFontScaleDown"));
+        config.setProperty("bgImageJournal", p.getProperty("bgImageJournal"));
+        config.setProperty("bgImageJournal_Left", p.getProperty("bgImageJournal_Left"));
         return config;
     }
 
@@ -55,25 +50,17 @@ public class handlerProperties
     {
         System.out.println("rwdoc Debug: Creating default config.");
         Properties p = new Properties();
-        p.setProperty("rwdocDocsDir", "docs");
         p.setProperty("rwdocCommand", "help");
-        p.setProperty("guiPOS_X", "0.5");
-        p.setProperty("guiPOS_Y", "0.5");
-        p.setProperty("guiSIZE_X", "0.5");
-        p.setProperty("guiSIZE_Y", "0.5");
-        p.setProperty("guiTitle", "rwdoc - Documentation for a Rising World");
         p.setProperty("guiFontColor", "0xffffffff");
         p.setProperty("guiBorderColor", "0x07070710");
         p.setProperty("guiLabelColor", "0x07FF0710");
         p.setProperty("rwdocImgLoc", "images");
-        p.setProperty("imageNavLeft", "arrow_left.png");
-        p.setProperty("imageNavRight", "arrow_right.png");
-        p.setProperty("imageNavUp", "arrow_up.png");
-        p.setProperty("imageButtonUp", "arrow_up_small.png");
-        p.setProperty("imageButtonDown", "arrow_down_small.png");
-        p.setProperty("imageButtonClose", "image_close.png");
-        p.setProperty("imageButtonFontScaleUp", "fontScaleUp.png");
-        p.setProperty("imageButtonFontScaleDown", "fontScaleDown.png");
+        p.setProperty("imageNavLeft", "hitbox.png");
+        p.setProperty("imageNavRight", "hitbox.png");
+        p.setProperty("imageNavUp", "hitbox.png");
+        p.setProperty("imageButtonClose", "hitbox.png");
+        p.setProperty("bgImageJournal", "journal.png");
+        p.setProperty("bgImageJournal_Left", "journal_left.png");
 
         return p;
     }

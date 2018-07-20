@@ -1,5 +1,6 @@
 package com.trevorjd.rwplugin;
 
-public class pageGui
+public class rwDocument
 {
+
 }
