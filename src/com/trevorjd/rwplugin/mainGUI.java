@@ -11,7 +11,7 @@ import static com.trevorjd.rwplugin.rwdoc.c;
 
 public class mainGUI
 {
-    public static void setupMainGUI(Player player)
+    public static void setupMainGUIold(Player player)
     {
         //do something
         GuiPanel pMainPanel = createMainPanel();

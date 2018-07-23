@@ -7,12 +7,17 @@ import net.risingworld.api.events.player.PlayerKeyEvent;
 import net.risingworld.api.events.player.gui.PlayerGuiElementClickEvent;
 import net.risingworld.api.gui.GuiElement;
 import net.risingworld.api.gui.GuiImage;
+import net.risingworld.api.gui.GuiPanel;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.KeyInput;
 
+import static com.trevorjd.rwplugin.RwdocLibrary.getDocumentbyTitle;
 import static com.trevorjd.rwplugin.mainGUI.toggleFrontPage;
 import static com.trevorjd.rwplugin.mainGUI.toggleGUI;
 import static com.trevorjd.rwplugin.rwdoc.plugin;
+import static com.trevorjd.rwplugin.rwdoc.rwdocLibrary;
+import static com.trevorjd.rwplugin.rwdocGUI.buildPage;
+import static com.trevorjd.rwplugin.rwdocGUI.setVisibility;
 import static com.trevorjd.rwplugin.rwdocUtils.*;
 
 public class rwdocCmdListener implements Listener
@@ -25,13 +30,18 @@ public class rwdocCmdListener implements Listener
         if (cmd[0].equals(rwdoc.c.getProperty("rwdocCommand")))
         {
             System.out.println("rwdoc Debug: command entered. Displaying GUI");
-            toggleGUI(player, true);
+            RwdocDocument document = rwdocLibrary.getDocumentbyTitle("Trevor's Fishy Business");
+            GuiPanel panelLeft = (GuiPanel) player.getAttribute("rwdoc_pageLeftPanel");
+            GuiPanel panelRight = (GuiPanel) player.getAttribute("rwdoc_pageRightPanel");
+            buildPage(panelLeft, player, document, 1);
+            buildPage(panelRight, player, document, 2);
+            setVisibility(player, true);
 
-            String eol = System.getProperty("line.separator");
-            updateGUI.setMenuListItems(plugin, player, "Server Rules" + eol + "Land Protection" + eol + "Building" + eol + "Animal Management" + eol + "Transportation" + eol + "Web Forum");
+            //String eol = System.getProperty("line.separator");
+            //updateGUI.setMenuListItems(plugin, player, "Server Rules" + eol + "Land Protection" + eol + "Building" + eol + "Animal Management" + eol + "Transportation" + eol + "Web Forum");
 
-            String s = "Welcome to our server!";
-            updateGUI.setPageBodyRight(plugin, player, s);
+            //String s = "Welcome to our server!";
+            //updateGUI.setPageBodyRight(plugin, player, s);
 
             player.setMouseCursorVisible(true);
         }
@@ -66,8 +76,8 @@ public class rwdocCmdListener implements Listener
         if (element == (GuiImage) player.getAttribute("iNavRight"))
         {
             System.out.println("rwdoc Debug: Page turn - right.");
-            updateGUI.setPageBodyLeft(plugin, player, getBluePrintInfo());
-            updateGUI.setPageBodyRight(plugin, player,getLoremIpsum());
+            //updateGUI.setPageBodyLeft(plugin, player, getBluePrintInfo());
+            //updateGUI.setPageBodyRight(plugin, player,getLoremIpsum());
             updateGUI.updatePageTitleRight(plugin, player, "Lorem to the Ipsum!");
             updateGUI.updatePageTitleLeft(plugin, player, getDefaultTitle());
             toggleFrontPage(player,false);
