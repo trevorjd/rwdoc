@@ -6,6 +6,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
+
 public class SAXHandler extends DefaultHandler {
 
     // OK, so this is tricky.
@@ -34,6 +36,8 @@ public class SAXHandler extends DefaultHandler {
     private String title;
     private String imageWidth;
     private String imageHeight;
+    private String alignment;
+    private String tabstop;
 
     public ArrayList<DocumentPage> getDocument()
     {
@@ -58,40 +62,46 @@ public class SAXHandler extends DefaultHandler {
                 pageList = new ArrayList<>();
         } else if (qName.equalsIgnoreCase("title"))
         {
-            //set boolean values for fields, will be used in setting page variables
+            tabstop = attributes.getValue("tab");
             bTitle = true;
         } else if (qName.equalsIgnoreCase("menuitem"))
         {
+            tabstop = attributes.getValue("tab");
+            alignment = attributes.getValue("align");
             pageNum = attributes.getValue("page");
             bMenuItem = true;
         } else if (qName.equalsIgnoreCase("headline"))
         {
+            tabstop = attributes.getValue("tab");
+            alignment = attributes.getValue("align");
             posx = attributes.getValue("posx");
             posy = attributes.getValue("posy");
             if (((posx != null) && (posy == null)) || ((posy != null) && (posx == null)))
-            {System.out.println("rwdoc ERROR - posx/posy pair incomplete in: " + title);};
+            {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             textColor = attributes.getValue("color");
             textSize = attributes.getValue("size");
             bHeadline = true;
         } else if (qName.equalsIgnoreCase("text"))
         {
+            alignment = attributes.getValue("align");
             posx = attributes.getValue("posx");
             posy = attributes.getValue("posy");
             if (((posx != null) && (posy == null)) || ((posy != null) && (posx == null)))
-            {System.out.println("rwdoc ERROR - posx/posy pair incomplete in: " + title);};
+            {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             textColor = attributes.getValue("color");
             textSize = attributes.getValue("size");
             bText = true;
         } else if (qName.equalsIgnoreCase("image"))
         {
+            alignment = attributes.getValue("align");
             posx = attributes.getValue("posx");
             posy = attributes.getValue("posy");
             if (((posx != null) && (posy == null)) || ((posy != null) && (posx == null)))
-            {System.out.println("rwdoc ERROR - posx/posy pair incomplete in: " + title);};
+            {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             imageWidth = attributes.getValue("width");
             imageHeight = attributes.getValue("height");
             if (((imageWidth != null) && (imageHeight == null)) || ((imageHeight != null) && (imageWidth == null)))
-            {System.out.println("rwdoc ERROR - width/height pair incomplete in: " + title);};
+            {rwdebug(2, "width/height pair incomplete in: " + title);};
             imageFilename = attributes.getValue("filename");
             bImage = true;
         }
@@ -100,7 +110,6 @@ public class SAXHandler extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         if (qName.equalsIgnoreCase("page")) {
-            //add Employee object to list
             pageList.add(page);
         }
     }
@@ -119,10 +128,10 @@ public class SAXHandler extends DefaultHandler {
                 element.setTextColor(textColor);
             if(null != textSize)
                 element.setTextSize(textSize);
+            if(null != tabstop)
+                element.setTabstop(tabstop);
             element.setTextString(new String(ch, start, length));
-            System.out.println("rwdoc Debug: elementType = " + element.getElementType());
-            System.out.println("rwdoc Debug: elementText = " + element.getTextString());
-            System.out.println("rwdoc Debug: adding title element");
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString());
             page.addElement(element);
             title = new String(ch, start, length);
             bTitle = false;
@@ -139,9 +148,11 @@ public class SAXHandler extends DefaultHandler {
                 element.setTextColor(textColor);
             if(null != textSize)
                 element.setTextSize(textSize);
+            if(null != tabstop)
+                element.setTabstop(tabstop);
             element.setPageNumber(pageNum);
             element.setTextString(new String(ch, start, length));
-            System.out.println("rwdoc Debug: adding menuitem element");
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " tabstop: " + element.getTabstop());
             page.addElement(element);
             bMenuItem = false;
             clearVars();
@@ -157,8 +168,10 @@ public class SAXHandler extends DefaultHandler {
                 element.setTextColor(textColor);
             if(null != textSize)
                 element.setTextSize(textSize);
+            if(null != tabstop)
+                element.setTabstop(tabstop);
             element.setTextString(new String(ch, start, length));
-            System.out.println("rwdoc Debug: adding headline element");
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " tabstop: " + element.getTabstop());
             page.addElement(element);
             bHeadline = false;
             clearVars();
@@ -175,7 +188,7 @@ public class SAXHandler extends DefaultHandler {
             if(null != textSize)
                 element.setTextSize(textSize);
             element.setTextString(new String(ch, start, length));
-            System.out.println("rwdoc Debug: adding text element");
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString());
             page.addElement(element);
             bText = false;
             clearVars();
@@ -197,7 +210,9 @@ public class SAXHandler extends DefaultHandler {
                 element.setImageWidth(imageWidth);
             if(null != imageHeight)
                 element.setImageHeight(imageHeight);
-            System.out.println("rwdoc Debug: adding image element");
+            if(null != alignment)
+                element.setAlignment(alignment);
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " filename: " + element.getFileName());
             page.addElement(element);
             bImage = false;
             clearVars();

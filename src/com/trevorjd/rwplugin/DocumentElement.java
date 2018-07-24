@@ -12,58 +12,15 @@ public class DocumentElement
     private String fileName;
     private String imageWidth;
     private String imageHeight;
+    private String alignment;
+    private String tabstop;
+    private String docTitle;
 
     public DocumentElement()
     {
     }
 
-    public String getxPosition()
-    {
-        return xPosition;
-    }
-
-    public String getyPosition()
-    {
-        return yPosition;
-    }
-
-    public String getTextColor()
-    {
-        return textColor;
-    }
-
-    public String getTextSize()
-    {
-        return textSize;
-    }
-
-    public String getElementType()
-    {
-        return elementType;
-    }
-
-    public String getTextString()
-    {
-        return textString;
-    }
-
-    public String getPageNumber() { return pageNumber; }
-
-    public String getFileName()
-    {
-        return fileName;
-    }
-
-    public String getImageHeight()
-    {
-        return imageHeight;
-    }
-
-    public String getImageWidth()
-    {
-        return imageWidth;
-    }
-
+    // setters
     public void setElementType(String elementType)
     {
         this.elementType = elementType;
@@ -104,6 +61,8 @@ public class DocumentElement
         this.fileName = fileName;
     }
 
+    public void setAlignment(String alignment) { this.alignment = alignment; }
+
     public void setImageHeight(String imageHeight)
     {
         this.imageHeight = imageHeight;
@@ -112,5 +71,73 @@ public class DocumentElement
     public void setImageWidth(String imageWidth)
     {
         this.imageWidth = imageWidth;
+    }
+
+    public void setTabstop(String tabstop)
+    {
+        this.tabstop = tabstop;
+    }
+
+    public void setDocTitle(String docTitle)
+    {
+        this.docTitle = docTitle;
+    }
+
+    // getters
+
+    public String getxPosition()
+    {
+        return xPosition;
+    }
+
+    public String getyPosition()
+    {
+        return yPosition;
+    }
+
+    public String getTextColor()
+    {
+        return textColor;
+    }
+
+    public String getTextSize()
+    {
+        return textSize;
+    }
+
+    public String getElementType()
+    {
+        return elementType;
+    }
+
+    public String getTextString()
+    {
+        return textString;
+    }
+
+    public String getPageNumber() { return pageNumber; }
+
+    public String getFileName()
+    {
+        return fileName;
+    }
+
+    public String getAlignment() {return alignment; }
+
+    public String getImageHeight()
+    {
+        return imageHeight;
+    }
+
+    public String getImageWidth()
+    {
+        return imageWidth;
+    }
+
+    public String getTabstop() { return tabstop; }
+
+    public String getDocTitle()
+    {
+        return docTitle;
     }
 }
