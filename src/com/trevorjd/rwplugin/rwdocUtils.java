@@ -34,7 +34,7 @@ public class rwdocUtils
         return success;
     }
 
-    public static void rwdebug(int level, String message)
+    public static void rwdebug(int logLevel, String message)
     {
         // Log levels
         // 1 - fatal errors
@@ -42,7 +42,7 @@ public class rwdocUtils
         // 3 - debugging
         // 4 - fine debugging
         String LOG_LEVEL = "";
-        switch (LOGLEVEL)
+        switch (logLevel)
         {
             case 1 :
                 LOG_LEVEL = "FATAL";
@@ -58,7 +58,7 @@ public class rwdocUtils
                 break;
         }
 
-        if (level <= LOGLEVEL) { System.out.println("rwdoc " + LOG_LEVEL + " " + message);}
+        if (logLevel <= LOGLEVEL) { System.out.println("rwdoc " + LOG_LEVEL + " " + message);}
     }
 
     private static final String newline = System.getProperty("line.separator");
@@ -69,7 +69,7 @@ public class rwdocUtils
         int linelength;
         if (fontSize <= 10) { linelength = 112; } else
         if (fontSize <= 15) { linelength = 76; } else
-        if (fontSize <= 20) { linelength = 50; } else
+        if (fontSize <= 20) { linelength = 55; } else
         if (fontSize <= 25) { linelength = 40; } else
         if (fontSize <= 30) { linelength = 38; } else
         if (fontSize <= 35) { linelength = 33; } else

@@ -1,7 +1,5 @@
 package com.trevorjd.rwplugin;
 
-import jdk.nashorn.internal.ir.ReturnNode;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
@@ -28,7 +26,7 @@ public class RwdocLibrary
     public static void addDocument(RwdocDocument document)
     {
         library.add(document);
-        rwdebug(3, "Added doc to library: " + document.getDocumentTitle() + " Now contains " + library.size() + " documents.");
+        rwdebug(3, "Added doc to library: " + document.getDocumentTitle() + "; Now contains " + library.size() + " documents.");
     }
 
     public static ArrayList<RwdocDocument> getLibrary()
@@ -151,26 +149,28 @@ public class RwdocLibrary
             page0 = document.getPagebyIndex(0);
             if(null == page0)
             {
-                rwdebug(2, "Default document incomplete. Missing Page 1");
+                rwdebug(2, "Default document incomplete. Missing Page 0");
                 page0 = new DocumentPage();
             }
             page1 = document.getPagebyIndex(1);
             if(null == page1)
             {
-                rwdebug(2, "Default document incomplete. Missing Page 2");
+                rwdebug(2, "Default document incomplete. Missing Page 1");
                 page1 = new DocumentPage();
             }
         }
 
         for (int count = 0; count < titleList.size(); count++)
         {
+            rwdebug(3, "page 0 size: " + page0.getNumberofElements());
             DocumentElement element = new DocumentElement();
             element.setElementType("menuitem");
             if(!titleList.get(count).equals("default")) // exclude itself
             {
                 element.setTextString(titleList.get(count));
                 element.setPageNumber("0");
-            }
+                rwdebug(3, "Added menuitem to default document: " + element.getTextString() + " Page: " + element.getPageNumber());
+            } else { rwdebug(3, "exluding default doc from menulist"); }
             page0.addElement(element);
         }
         RwdocDocument newDoc = new RwdocDocument();

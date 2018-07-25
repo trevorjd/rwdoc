@@ -17,11 +17,12 @@ public class DocumentPage
     {
     }
 
-    public int getPageNumber()
+    public void addElement(DocumentElement element)
     {
-        return pageNumber;
+        elementList.add(element);
     }
 
+    //setters
     public void setPageNumber(int pageNumber)
     {
         pageNumber = pageNumber;
@@ -32,9 +33,10 @@ public class DocumentPage
         elementList = elementList;
     }
 
-    public void addElement(DocumentElement element)
+    //getters
+    public int getPageNumber()
     {
-        elementList.add(element);
+        return pageNumber;
     }
 
     public String getTitle()
@@ -51,4 +53,6 @@ public class DocumentPage
     {
         return elementList;
     }
+
+    public int getNumberofElements() { return elementList.size(); }
 }

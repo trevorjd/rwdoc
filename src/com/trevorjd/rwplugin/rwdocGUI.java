@@ -6,13 +6,15 @@ import net.risingworld.api.utils.ImageInformation;
 
 import java.util.*;
 
+import static com.trevorjd.rwplugin.MenuItemHandler.assignToPlayer;
 import static com.trevorjd.rwplugin.rwdoc.*;
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 import static com.trevorjd.rwplugin.rwdocUtils.wordWrap;
+import static java.lang.Math.max;
 
 public class rwdocGUI
 {
-    private static Float padding = 0.005f;
+    private static Float padding = 0.01f;
     private static int pageNumBuffer = 0;  // used to buffer the page number from addLabelAttributes()
                             // to the Map since the GuiLabel element can't hold it
 
@@ -141,8 +143,7 @@ public class rwdocGUI
             String pass2 = pass1.replace("\t", "");
             String pass3 = pass2.replace("\n", "");
             trimmed = pass2.trim();
-        } else rwdebug(2, "cleanText received a null value!.");
-
+        } else rwdebug(2, "cleanText received a null value! This shouldn't happen.");
         return trimmed;
     }
 
@@ -152,21 +153,31 @@ public class rwdocGUI
         DocumentPage page = document.getPagebyIndex(pageNumber);
         //Array to hold list of GUI elements to be added
         ArrayList<DocumentElement> pageElements = page.getElementList();
+        // Float used to set vertical alignment of each new element
         Float current_Y_pos = 1.0f;
         // Array to track gui elements added to the player's HUD. Used in Utils to clear the HUD.
         ArrayList<GuiElement> guiItems = new ArrayList<GuiElement>();
-
-        // loop through elements list, creating elements as needed
+        // Map to track auto-generated menu items; used in Listener for document/page management
+        ArrayList<MenuItem> menuitems = new ArrayList<MenuItem>();
+        MenuItemHandler mih = (MenuItemHandler) player.getAttribute("rwdoc_mih");
+        // RwdocDocuments contain an array of pages.
+        // each DocumentPage has an array of DocumentElements.
+        // loop through elements list, creating GUIElements as specified
+        // GUIElements are stored in pageElemnents for display AND guiItems for later removal
         for (int count = 0; count < pageElements.size(); count++)
         {
-            String newline = System.getProperty("line.separator");
-            DocumentElement element = pageElements.get(count);
+            DocumentElement element = null;
+            element = pageElements.get(count);
             String elementType = element.getElementType();
+            rwdebug(3, "processing new docElement. type: " + count + " " + elementType);
+
             if (elementType.equals("title"))
             {
                 if (!element.getTextString().equals("default"))
                 {
-                    rwdebug(4, "title element - not default doc");
+                    // default document does not get a title displayed, just a list of menu items
+                    rwdebug(4, "Found title element - not default doc");
+                    rwdebug(4, "currentdoc: " + String.valueOf(player.getAttribute("rwdoc_current_document")));
                     GuiLabel label = new GuiLabel(cleanText(element.getTextString()), 0f, current_Y_pos, true);
                     GuiLabel attribLabel = addLabelAttributes(element, label);
                     if (label.getPositionY() == attribLabel.getPositionY())
@@ -186,31 +197,58 @@ public class rwdocGUI
             }
             if (elementType.equals("menuitem"))
             {
-                rwdebug(4, "found a menu item");
-                // Map to track auto-generated menu items; used in Listener for document/page management
-                Map<Integer, MenuElement> menuitems = (HashMap<Integer, MenuElement>) player.getAttribute("rwdoc_menu_elements");
-                rwdebug(4, "got hashmap");
-                GuiLabel label = new GuiLabel(wordWrap(cleanText(element.getTextString()), 30), 0f, current_Y_pos, true);
-                GuiLabel attribLabel = addLabelAttributes(element, label);
-                MenuItem menuItem = (MenuItem) attribLabel;
-                if (null != element.getPageNumber()) { menuItem.setPageNum(Integer.parseInt(element.getPageNumber())); }
-                if (null != element.getTextString()) { menuItem.setLinkDocTitle(element.getTextString()); }
-                if (label.getPositionY() == attribLabel.getPositionY())
+                rwdebug(3, "found a menu item");
+                if(element.getTextString() != null && !element.getTextString().isEmpty())
                 {
-                    current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
-                    attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
+                    rwdebug(3, "element.getTextString() is not empty: " + element.getTextString());
+                    GuiLabel label = new GuiLabel(wordWrap(cleanText(element.getTextString()),30), 0f, current_Y_pos, true);
+                    GuiLabel attribLabel = addLabelAttributes(element, label);
+                    if (label.getPositionY() == attribLabel.getPositionY())
+                    {
+                        current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
+                        attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
+                    }
+                    panel.addChild(attribLabel);
+                    player.addGuiElement(attribLabel);
+
+                    attribLabel.setClickable(true);
+                    guiItems.add(attribLabel);
+                    attribLabel.setVisible(true);
+                    rwdebug(3, "PageBuilder;MenuItem - done with the basics");
+                    rwdebug(3, "PageBuilder;MenuItem - element info");
+                    if(!element.getTextString().isEmpty())
+                    { rwdebug(3, element.getTextString()); } else { rwdebug(3, "getTextString is empty."); }
+                    if(!element.getPageNumber().isEmpty())
+                    { rwdebug(3, element.getPageNumber()); } else { rwdebug(3, "getPageNumber is empty."); }
+                    if(attribLabel.getID() != 0)
+                    { rwdebug(3, String.valueOf(attribLabel.getID())); } else { rwdebug(3, "getID is zero."); }
+
+                    // add attribLabel to the menuitems arraylist
+                    rwdebug(3, "PageBuilder;MenuItem - creating a MenuItem()");
+                    MenuItem menuItem = new MenuItem();
+                    if(!attribLabel.getText().isEmpty())
+                    {
+                        rwdebug(3,"PageBuilder;MenuItem - attribLabel.getText()=" + attribLabel.getText());
+                        menuItem.setLinkDocTitle(attribLabel.getText());
+                    } else { rwdebug(3, "PageBuilder;MenuItem;attribLabel.getText() is empty."); }
+                    if (!element.getPageNumber().isEmpty())
+                    {
+                        rwdebug(3, "PageBuilder;MenuItem; getPageNumber() = " + Integer.parseInt(element.getPageNumber()));
+                        rwdebug(3, "PageBuilder;MenuItem; max() = " + max(0, Integer.parseInt(element.getPageNumber())));
+                        menuItem.setPageNum(max(0, Integer.parseInt(element.getPageNumber())));
+                    } else { rwdebug(3, "PageBuilder;MenuItem;element.pageNum is empty."); }
+                    menuItem.setGuiLabel(attribLabel);
+                    // guard against weird null menuitem that's showing up
+                    if (!menuItem.getLinkDocTitle().isEmpty())
+                    {
+
+                        menuitems.add(menuItem);
+                        mih.addMenuItem(attribLabel.getText(), Integer.parseInt(element.getPageNumber()), attribLabel);
+                        rwdebug(3, "MenuItem added to menuItems. size: " + menuitems.size());
+                    }
                 }
-                panel.addChild(attribLabel);
-                player.addGuiElement(attribLabel);
-                rwdebug(4, "adding menuitem to hashmap");
-                MenuElement menuElement = new MenuElement();
-                menuElement.setTitle(attribLabel.getText());
-                menuElement.setPageNum(pageNumBuffer);
-                pageNumBuffer = 0;
-                menuitems.put(attribLabel.getID(), menuElement);
-                attribLabel.setClickable(true);
-                guiItems.add(attribLabel);
-                attribLabel.setVisible(true);
+
+
             }
             if (elementType.equals("headline"))
             {
@@ -261,13 +299,27 @@ public class rwdocGUI
                 attribImage.setVisible(true);
             }
         }
-        rwdebug(4, "playerGuiItem size = " + guiItems.size());
+        rwdebug(3, "playerGuiItem size = " + guiItems.size());
         for (GuiElement item : guiItems)
         {
-            rwdebug(4, "guiItems contains item: " + item.getID());
+            rwdebug(3, "guiItems contains item: " + item.getID());
         }
         rwdebug(3, "Page done. Attribname: " + "rwdoc_gui_elements_" + panel.getID());
+
         player.setAttribute("rwdoc_gui_elements_" + panel.getID(), guiItems);
+
+        rwdebug(3, "PageBuilder: let's see what in the menu items map... size: " + menuitems.size());
+        for (MenuItem m : menuitems)
+        {
+            rwdebug(3, "id=" + m + "m=" + m.getLinkDocTitle() + " p=" + m.getPageNum());
+        }
+        rwdebug(3, "about to query the menuitemhandler");
+        mih.queryMenuItems();
+        rwdebug(3, "I have queried the menuitemhandler");
+        player.deleteAttribute("rwdoc_menu_elements");
+        player.setAttribute("rwdoc_menu_elements", menuitems);
+        assignToPlayer(player);
+
     }
 
     public static GuiLabel addLabelAttributes(DocumentElement edoc, GuiLabel egui)

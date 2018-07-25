@@ -227,6 +227,11 @@ public class SAXHandler extends DefaultHandler {
         textSize = null;
         pageNum = null;
         imageFilename = null;
+        imageWidth = null;
+        imageHeight = null;
+        alignment = null;
+        pageNum = null;
+        tabstop = null;
     }
 }
 

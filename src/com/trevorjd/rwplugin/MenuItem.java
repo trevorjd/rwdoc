@@ -2,23 +2,14 @@ package com.trevorjd.rwplugin;
 
 import net.risingworld.api.gui.GuiLabel;
 
-public class MenuItem extends GuiLabel
+public class MenuItem
 {
     private static String linkDocTitle;
     private static int pageNum;
+    private static GuiLabel guiLabel;
 
-    public MenuItem(float x, float y, boolean relativeposition, String linkDocTitle, int pageNum)
+    public MenuItem()
     {
-        super(x, y, relativeposition);
-        this.linkDocTitle = linkDocTitle;
-        this.pageNum = pageNum;
-    }
-
-    public MenuItem(java.lang.String text, float x, float y, boolean relativeposition, String linkDocTitle, int pageNum)
-    {
-        super(text, x, y, relativeposition);
-        this.linkDocTitle = linkDocTitle;
-        this.pageNum = pageNum;
     }
 
     //setters
@@ -33,6 +24,11 @@ public class MenuItem extends GuiLabel
         this.linkDocTitle = docTitle;
     }
 
+    public static void setGuiLabel(GuiLabel guiLabel)
+    {
+        MenuItem.guiLabel = guiLabel;
+    }
+
     //getters
 
     public int getPageNum()
@@ -43,5 +39,10 @@ public class MenuItem extends GuiLabel
     public String getLinkDocTitle()
     {
         return linkDocTitle;
+    }
+
+    public static GuiLabel getGuiLabel()
+    {
+        return guiLabel;
     }
 }

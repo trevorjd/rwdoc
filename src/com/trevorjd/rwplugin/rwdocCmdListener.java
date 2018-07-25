@@ -7,12 +7,12 @@ import net.risingworld.api.events.player.PlayerKeyEvent;
 import net.risingworld.api.events.player.gui.PlayerGuiElementClickEvent;
 import net.risingworld.api.gui.GuiElement;
 import net.risingworld.api.gui.GuiImage;
+import net.risingworld.api.gui.GuiLabel;
 import net.risingworld.api.gui.GuiPanel;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.KeyInput;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import static java.lang.Math.max;
 import static com.trevorjd.rwplugin.rwdoc.rwdocLibrary;
 import static com.trevorjd.rwplugin.rwdocGUI.buildPage;
@@ -41,10 +41,10 @@ public class rwdocCmdListener implements Listener
         rwdebug(3, "Refreshing GUI");
         clearGUI(player);
         ArrayList<GuiElement> guiItems = new ArrayList<GuiElement>();
+        MenuItemHandler mih = new MenuItemHandler();
+        player.setAttribute("rwdoc_mih", mih);
         player.setAttribute("rwdoc_gui_elements", guiItems);
         RwdocDocument document = rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")));
-        player.deleteAttribute("rwdoc_menu_elements");
-        player.setAttribute("rwdoc_menu_elements", new HashMap<Integer, String>());
         rwdebug(3, "Got document: " + document.getDocumentTitle());
         int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
         GuiPanel panelLeft = (GuiPanel) player.getAttribute("rwdoc_pageLeftPanel");
@@ -68,6 +68,7 @@ public class rwdocCmdListener implements Listener
             {
                 rwdebug(4, "removing item: " + item.getID());
                 player.removeGuiElement(item);
+                item.destroy();
             }
             player.deleteAttribute("rwdoc_gui_elements");
             rwdebug(4, "rwdoc_gui_elements removed");
@@ -111,14 +112,15 @@ public class rwdocCmdListener implements Listener
         if (element == (GuiImage) player.getAttribute("rwdoc_button_up"))
         {
             rwdebug(3, "button_up clicked");
-            RwdocDocument document = rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")));
             int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
             if (pagenum != 0)
             {
-                pagenum = 0;
+                rwdebug(3, "Returning to top of current document.");
+                player.setAttribute("rwdoc_current_page", "0");
                 refreshGUI(player);
             } else
             {
+                rwdebug(3, "Returning to default document.");
                 player.setAttribute("rwdoc_current_document", "default");
                 player.setAttribute("rwdoc_current_page", "0");
                 refreshGUI(player);
@@ -128,47 +130,85 @@ public class rwdocCmdListener implements Listener
         if (element == (GuiImage) player.getAttribute("rwdoc_button_left"))
         {
             rwdebug(3, "button_left clicked");
+            rwdebug(3, "current document: " + String.valueOf((player.getAttribute("rwdoc_current_document"))));
             RwdocDocument document = rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")));
-            int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
-            player.setAttribute("rwdoc_current_page", max(0, pagenum - 2));
-            refreshGUI(player);
+            if (document != null)
+            {
+                rwdebug(3, "document is not null");
+                int numberofPages = document.getNumberofPages();
+                if (numberofPages != 0)
+                {
+                    rwdebug(3, "numberofPages > 0");
+                    int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
+                    player.setAttribute("rwdoc_current_page", max(0, pagenum - 2));
+                    refreshGUI(player);
+                } else {rwdebug(2, "button_right: Zero pages in document! This shouldn't happen.");}
+            } else { rwdebug(2, "button_right: current document is null! This shouldn't happen."); }
         } else
 
         if (element == (GuiImage) player.getAttribute("rwdoc_button_right"))
         {
             rwdebug(3, "button_right clicked");
+            rwdebug(3, "current document: " + String.valueOf((player.getAttribute("rwdoc_current_document"))));
             RwdocDocument document = rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")));
-            int numberofPages = document.getNumberofPages();
-            int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
-            if (pagenum + 1 > numberofPages)
+            if (document != null)
             {
-                player.setAttribute("rwdoc_current_page", pagenum + 2);
-            }
-            refreshGUI(player);
+                rwdebug(3, "document is not null");
+                int numberofPages = document.getNumberofPages();
+                if (numberofPages != 0)
+                {
+                    rwdebug(3, "numberofPages > 0");
+                    int pagenum = Integer.parseInt(String.valueOf(player.getAttribute("rwdoc_current_page")));
+                    if (pagenum + 1 > numberofPages)
+                    {
+                        player.setAttribute("rwdoc_current_page", pagenum + 2);
+                    }
+                    refreshGUI(player);
+                } else {rwdebug(2, "button_right: Zero pages in document! This shouldn't happen.");}
+            } else { rwdebug(2, "button_right: current document is null! This shouldn't happen."); }
         } else
         {
             rwdebug(3, "Click didn't match anything above. Checking menu buttons.");
-            HashMap<Integer, MenuElement> menuElements = (HashMap<Integer, MenuElement>) player.getAttribute("rwdoc_menu_elements");
-            rwdebug(3, "Have ID list; setting title");
-            MenuElement menuElement = menuElements.get(element.getID());
-            if (menuElement != null)
+            ArrayList<GuiLabel> guiLabelsMIH = (ArrayList<GuiLabel>) player.getAttribute("rwdoc_MIH_guilabels");
+            ArrayList<String> docLinksMIH = (ArrayList<String>) player.getAttribute("rwdoc_MIH_doclinks");
+            ArrayList<Integer> pageNumMIH = (ArrayList<Integer>) player.getAttribute("rwdoc_MIH_pagenums");
+            for (int count = 0; count < guiLabelsMIH.size(); count++)
             {
-                String newDocTitle = menuElement.getTitle();
-                if(newDocTitle != "")
+                rwdebug(3, "Listener: Have title:" + docLinksMIH.get(count));
+            }
+            // OK let's process them
+            boolean foundMatch = false;
+            for (int count = 0; count < guiLabelsMIH.size(); count++)
+            {
+                if(element == guiLabelsMIH.get(count))
                 {
-                    rwdebug(4, "newdoctitle = " + newDocTitle);
-                    player.setAttribute("rwdoc_current_document", newDocTitle);
-                    RwdocDocument document = rwdocLibrary.getDocumentbyTitle(newDocTitle);
-                    if (menuElement.getPageNum() <= document.getNumberofPages())
+                    rwdebug(3, "Listener: found matching GuiLabel");
+                    String newDocTitle = docLinksMIH.get(count);
+                    if(newDocTitle != "")
                     {
-                        player.setAttribute("rwdoc_current_page", menuElement.getPageNum());
-                        refreshGUI(player);
-                    } else { rwdebug(2, "Invalid page number requested in: " + newDocTitle); }
-                } else { rwdebug(2, "Invalid document requested! This shouldn't happen."); }
-            } else { rwdebug(2, "Invalid menuitem near: " +
-                    rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")))
-                    + " Page: " + String.valueOf(player.getAttribute("rwdoc_current_page"))); }
-
+                        rwdebug(3, "newdoctitle = " + newDocTitle);
+                        player.setAttribute("rwdoc_current_document", newDocTitle);
+                        RwdocDocument document = rwdocLibrary.getDocumentbyTitle(newDocTitle);
+                        if(document != null)
+                        {
+                            if (pageNumMIH.get(count) <= document.getNumberofPages())
+                            {
+                                player.setAttribute("rwdoc_current_page", pageNumMIH.get(count));
+                                refreshGUI(player);
+                            } else { rwdebug(2, "Invalid page number requested in: " + newDocTitle); }
+                        } else { rwdebug(2, "Link to non-existent document: " + newDocTitle
+                                + " in " + String.valueOf((player.getAttribute("rwdoc_current_document")))
+                                + " on " + String.valueOf((player.getAttribute("rwdoc_current_page")))
+                        ); }
+                    } else { rwdebug(2, "Null value in menu button checking. This should never happen!"); }
+                } else { rwdebug(3, "Listener - Not this one. Keep searching..."); }
+            }
+            if(!foundMatch)
+            {
+                rwdebug(2, "Invalid menuitem near: " +
+                        rwdocLibrary.getDocumentbyTitle(String.valueOf(player.getAttribute("rwdoc_current_document")))
+                        + " Page: " + String.valueOf(player.getAttribute("rwdoc_current_page")));
+            }
 
         }
     }
