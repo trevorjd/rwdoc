@@ -5,12 +5,9 @@ import net.risingworld.api.events.EventMethod;
 import net.risingworld.api.events.Listener;
 import net.risingworld.api.events.player.PlayerConnectEvent;
 import net.risingworld.api.events.player.PlayerSpawnEvent;
-import net.risingworld.api.gui.GuiElement;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.ImageInformation;
-import net.risingworld.api.utils.KeyInput;
 
-import java.util.ArrayList;
 import java.util.Properties;
 
 import static com.trevorjd.rwplugin.rwdocGUI.setupMainGUI;
@@ -38,6 +35,7 @@ import static com.trevorjd.rwplugin.rwdocGUI.setupMainGUI;
  * - word wrapping
  * - tab stops for headings (indentation) using XML tab= attribute. (Nine steps of 10% each; headings only because word-wrapping is unaware of tab stops)
  * - image embedding!
+ * - optional frames around images
  * - multiple documents
  * - refresh button (for ease of editing, save file in-place and hit refresh)
  * - journal XML format (extended)
@@ -60,23 +58,40 @@ import static com.trevorjd.rwplugin.rwdocGUI.setupMainGUI;
  * - NavButtons and CloseButton won't work if you cover them! (API limitation)
  * - It's necessary for the author to ensure all pages are numbered
  * - It's necessary for the author to ensure all page numbers are consecutive
+ * - In-text color codes (e.g. [#7055ed]) behave strangely so are not enabled. (Trevor or API limitation? Not sure.)
  */
 
 public class rwdoc extends Plugin implements Listener
 {
-    // Globals
+    // Globals - hardwired
     public static Properties c = null; // config options in here
     protected static rwdoc plugin;
     protected static final String IMGDIR = "/images/";
-    protected static boolean EDITOR = true; //user is in editor mode - show label borders
-    protected static boolean EXTSEARCH = true; //search 3rd party plugin folders for rwdoc/rwdoc.xml
     protected static ImageInformation BGIMAGE;
     protected static ImageInformation HITBOXIMAGE;
-    protected static String PLUGINSFOLDER;
-    protected static RwdocLibrary rwdocLibrary;
-    private static rwdocCmdListener cmdListener = new rwdocCmdListener();
-    protected static int FONTCOLOR = 0x30201370;
-    protected static int LOGLEVEL = 3;
+    protected static ImageInformation BULLET;
+    protected static ImageInformation IMAGE_FRAME_1;
+    protected static ImageInformation IMAGE_FRAME_2;
+    protected static ImageInformation IMAGE_FRAME_3;
+    protected static ImageInformation IMAGE_FRAME_4;
+    protected static String PLUGINSFOLDER; // location of RW plugins folder for searching other plugins
+    protected static String DEFAULT_TITLE = "rwDoc - Documentation for a Rising World";
+
+    // Globals - init with config file
+    protected static boolean EDITOR; //plugin is in editor mode - show label borders
+    protected static boolean EXTSEARCH; //search 3rd party plugin folders for rwdoc/rwdoc.xml
+    protected static int FONTCOLOR;
+    protected static int LOGLEVEL = 3; //give it a default value so that it works when loading properties
+    protected static String ACTIVATION_CMD;
+    protected static String REFRESH_CMD;
+    protected static int DEFAULT_HEADLINE_SIZE = 30;
+    protected static int DEFAULT_MENUITEM_SIZE = 40;
+    protected static int DEFAULT_TEXT_SIZE = 20;
+    protected static boolean MENUITEM_BULLETS;
+
+    // Shared resources
+    protected static RwdocLibrary RWDOC_LIBRARY;
+    private static rwdocCmdListener CMD_LISTENER = new rwdocCmdListener();
 
     @Override
     public void onEnable(){
@@ -85,7 +100,7 @@ public class rwdoc extends Plugin implements Listener
         if (initSuccess)
         {
             registerEventListener(this);
-            registerEventListener(cmdListener);
+            registerEventListener(CMD_LISTENER);
             System.out.println("rwdoc: Enabled.");
         } else
             System.out.println("rwdoc: Failed to initialise. Check log for details.");
@@ -112,8 +127,8 @@ public class rwdoc extends Plugin implements Listener
     {
         Player player = event.getPlayer();
         player.setAttribute("guiVisible", false);
-        player.setListenForKeyInput(true);
-        player.registerKeys(KeyInput.KEY_Y);
+        //player.setListenForKeyInput(true);
+        //player.registerKeys(KeyInput.KEY_Y);
     }
 
 }

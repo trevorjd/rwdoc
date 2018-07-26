@@ -17,6 +17,8 @@ public class DocumentPage
     {
     }
 
+    public void insertTitle(DocumentElement element) { elementList.add(0, element); }
+
     public void addElement(DocumentElement element)
     {
         elementList.add(element);

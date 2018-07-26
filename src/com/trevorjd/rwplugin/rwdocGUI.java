@@ -1,6 +1,7 @@
 package com.trevorjd.rwplugin;
 
 import net.risingworld.api.gui.*;
+import net.risingworld.api.gui.Font;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.ImageInformation;
 
@@ -10,14 +11,10 @@ import static com.trevorjd.rwplugin.MenuItemHandler.assignToPlayer;
 import static com.trevorjd.rwplugin.rwdoc.*;
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 import static com.trevorjd.rwplugin.rwdocUtils.wordWrap;
-import static java.lang.Math.max;
 
 public class rwdocGUI
 {
     private static Float padding = 0.01f;
-    private static int pageNumBuffer = 0;  // used to buffer the page number from addLabelAttributes()
-                            // to the Map since the GuiLabel element can't hold it
-
     /*
     give an array of document elements
     for each element:
@@ -59,7 +56,7 @@ public class rwdocGUI
         GuiImage bgImage = new GuiImage(BGIMAGE, 0f, 0f, true, 1080, 720, false);
 
         // child of bgImage
-        GuiPanel pageLeftPanel = new GuiPanel(0.07f, 0.07f, true, 0.4f, 0.9f, true);
+        GuiPanel pageLeftPanel = new GuiPanel(0.07f, 0.07f, true, 0.4f, 0.88f, true);
         pageLeftPanel.setColor(0x00000000);
         if (EDITOR)
         {
@@ -71,7 +68,7 @@ public class rwdocGUI
         }//invisible
 
         // child of bgImage
-        GuiPanel pageRightPanel = new GuiPanel(0.53f, 0.07f, true, 0.4f, 0.9f, true);
+        GuiPanel pageRightPanel = new GuiPanel(0.53f, 0.07f, true, 0.4f, 0.88f, true);
         pageRightPanel.setColor(0x00000000);
         if (EDITOR)
         {
@@ -83,15 +80,36 @@ public class rwdocGUI
         } //invisible
 
         // child of bgImage
+        GuiLabel titleLeft = new GuiLabel(DEFAULT_TITLE, 0.27f, 0.95f, true);
+        titleLeft.setFontSize(16);
+        titleLeft.setFontColor(FONTCOLOR);
+        titleLeft.setPivot(PivotPosition.CenterBottom);
+
+        GuiLabel titleRight = new GuiLabel(DEFAULT_TITLE, 0.75f, 0.95f, true);
+        titleRight.setFontSize(16);
+        titleRight.setFontColor(FONTCOLOR);
+        titleRight.setPivot(PivotPosition.CenterBottom);
 
         GuiImage button_close = new GuiImage(HITBOXIMAGE, 0.96f, 0.94f, true, 38, 38, false);
         button_close.setClickable(true);
         GuiImage button_left = new GuiImage(HITBOXIMAGE, 0.0f, 0.05f, true, 64, 38, false);
         button_left.setClickable(true);
-        GuiImage button_right = new GuiImage(HITBOXIMAGE, 0.95f, 0.05f, true, 64, 38, false);
+        GuiImage button_right = new GuiImage(HITBOXIMAGE, 0.93f, 0.05f, true, 64, 38, false);
         button_right.setClickable(true);
         GuiImage button_up = new GuiImage(HITBOXIMAGE, 0.495f, 0.05f, true, 38, 64, false);
         button_up.setClickable(true);
+
+        GuiLabel pageNumLabelLeft = new GuiLabel("", 0.1f, 0.05f, true);
+        pageNumLabelLeft.setFontSize(60);
+        pageNumLabelLeft.setFontColor(FONTCOLOR);
+        pageNumLabelLeft.setPivot(PivotPosition.CenterBottom);
+        pageNumLabelLeft.setFont(Font.Handdrawn);
+
+        GuiLabel pageNumLabelRight = new GuiLabel("", 0.90f, 0.05f, true);
+        pageNumLabelRight.setFontSize(60);
+        pageNumLabelRight.setFontColor(FONTCOLOR);
+        pageNumLabelRight.setPivot(PivotPosition.CenterBottom);
+        pageNumLabelRight.setFont(Font.Handdrawn);
 
         mainPanel.addChild(bgImage);
         bgImage.addChild(pageLeftPanel);
@@ -100,6 +118,10 @@ public class rwdocGUI
         bgImage.addChild(button_left);
         bgImage.addChild(button_right);
         bgImage.addChild(button_up);
+        bgImage.addChild(titleLeft);
+        bgImage.addChild(titleRight);
+        bgImage.addChild(pageNumLabelLeft);
+        bgImage.addChild(pageNumLabelRight);
 
         mainPanel.setVisible(false);
         bgImage.setVisible(false);
@@ -109,6 +131,10 @@ public class rwdocGUI
         button_left.setVisible(false);
         button_right.setVisible(false);
         button_up.setVisible(false);
+        titleLeft.setVisible(false);
+        titleRight.setVisible(false);
+        pageNumLabelLeft.setVisible(false);
+        pageNumLabelRight.setVisible(false);
 
         player.setAttribute("rwdoc_mainPanel", mainPanel);
         player.setAttribute("rwdoc_bgImage", bgImage);
@@ -118,6 +144,10 @@ public class rwdocGUI
         player.setAttribute("rwdoc_button_left", button_left);
         player.setAttribute("rwdoc_button_right", button_right);
         player.setAttribute("rwdoc_button_up", button_up);
+        player.setAttribute("rwdoc_titleLeft", titleLeft);
+        player.setAttribute("rwdoc_titleRight", titleRight);
+        player.setAttribute("rwdoc_pageNumLabelLeft", pageNumLabelLeft);
+        player.setAttribute("rwdoc_pageNumLabelRight", pageNumLabelRight);
     }
 
     public static void addCommonGuiToPlayer(Player player)
@@ -130,6 +160,10 @@ public class rwdocGUI
         player.addGuiElement((GuiImage) player.getAttribute("rwdoc_button_left"));
         player.addGuiElement((GuiImage) player.getAttribute("rwdoc_button_right"));
         player.addGuiElement((GuiImage) player.getAttribute("rwdoc_button_up"));
+        player.addGuiElement((GuiLabel) player.getAttribute("rwdoc_titleLeft"));
+        player.addGuiElement((GuiLabel) player.getAttribute("rwdoc_titleRight"));
+        player.addGuiElement((GuiLabel) player.getAttribute("rwdoc_pageNumLabelLeft"));
+        player.addGuiElement((GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight"));
     }
 
     private static String cleanText(String inputString)
@@ -137,6 +171,7 @@ public class rwdocGUI
         String trimmed = "";
         if(null != inputString)
         {
+            rwdebug(3, "inputString: " + inputString);
             String pass1 = inputString.trim();
             String newline = System.getProperty("line.separator");
             // String pass1 = inputString.replace(newline, "");
@@ -149,16 +184,49 @@ public class rwdocGUI
 
     public static void buildPage(GuiPanel panel, Player player, RwdocDocument document, int pageNumber)
     {
+        boolean firstItem = true;
         rwdebug(3, "Building document: " +document.getDocumentTitle() + "; page: " + pageNumber + ".");
-        DocumentPage page = document.getPagebyIndex(pageNumber);
+        // if the right side page is empty, create a blank one.
+        DocumentPage page;
+        if(pageNumber > (document.getNumberofPages()-1))
+        {
+            rwdebug(3, "There is no page: " + pageNumber + ". Creating a placeholder.");
+            page = new DocumentPage();
+            DocumentElement elementToInsert = new DocumentElement();
+            elementToInsert.setElementType("text");
+            elementToInsert.setTextString(c.getProperty("msg_no_content"));
+            elementToInsert.setyPosition("0.5");
+            elementToInsert.setAlignment("center");
+            page.addElement(elementToInsert);
+        } else { page = document.getPagebyIndex(pageNumber); }
+        // add page numbering
+        GuiLabel pageNumLabelLeft = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelLeft");
+        GuiLabel pageNumLabelRight = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight");
+        if(document.getDocumentTitle().equals("default"))
+        {
+            // no numbers on the front page
+            pageNumLabelLeft.setText("");
+            pageNumLabelRight.setText("");
+        } else
+        {
+            if(pageNumber % 2 == 0)
+            {
+                pageNumLabelLeft.setText(String.valueOf(pageNumber + 1));
+            } else { pageNumLabelRight.setText(String.valueOf(pageNumber + 1)); }
+        }
+
+        // insert a doc title element if the page has none
+        DocumentElement titleToInsert = new DocumentElement();
+        titleToInsert.setTextString(document.getDocumentTitle());
+        titleToInsert.setElementType("title");
+        page.insertTitle(titleToInsert);
         //Array to hold list of GUI elements to be added
         ArrayList<DocumentElement> pageElements = page.getElementList();
         // Float used to set vertical alignment of each new element
         Float current_Y_pos = 1.0f;
         // Array to track gui elements added to the player's HUD. Used in Utils to clear the HUD.
         ArrayList<GuiElement> guiItems = new ArrayList<GuiElement>();
-        // Map to track auto-generated menu items; used in Listener for document/page management
-        ArrayList<MenuItem> menuitems = new ArrayList<MenuItem>();
+        // Track auto-generated menu items; used in Listener for document/page management
         MenuItemHandler mih = (MenuItemHandler) player.getAttribute("rwdoc_mih");
         // RwdocDocuments contain an array of pages.
         // each DocumentPage has an array of DocumentElements.
@@ -173,87 +241,84 @@ public class rwdocGUI
 
             if (elementType.equals("title"))
             {
+                // titles are a special case because they're not on the left/right panels
+                // don't process with attributeLabel(), adjust Y values, etc.
+                rwdebug(3, "Found a title element.");
+                GuiLabel titleLeft = (GuiLabel) player.getAttribute("rwdoc_titleLeft");
+                GuiLabel titleRight = (GuiLabel) player.getAttribute("rwdoc_titleRight");
+                rwdebug(3, "Got them from the player.");
                 if (!element.getTextString().equals("default"))
                 {
-                    // default document does not get a title displayed, just a list of menu items
                     rwdebug(4, "Found title element - not default doc");
-                    rwdebug(4, "currentdoc: " + String.valueOf(player.getAttribute("rwdoc_current_document")));
-                    GuiLabel label = new GuiLabel(cleanText(element.getTextString()), 0f, current_Y_pos, true);
-                    GuiLabel attribLabel = addLabelAttributes(element, label);
-                    if (label.getPositionY() == attribLabel.getPositionY())
-                    {
-                        current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
-                        attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
-                    }
-
-                    panel.addChild(attribLabel);
-                    player.addGuiElement(attribLabel);
-                    guiItems.add(attribLabel);
-                    attribLabel.setVisible(true);
+                    titleLeft.setText(cleanText(element.getTextString()));
+                    titleRight.setText(cleanText(element.getTextString()));
                 } else
                 {
-                    rwdebug(4, "title element - default doc - ignored");
+                    rwdebug(3, "Default document found; using default titles.");
+                    titleLeft.setText(DEFAULT_TITLE);
+                    titleRight.setText(DEFAULT_TITLE);
                 }
             }
+
             if (elementType.equals("menuitem"))
             {
                 rwdebug(3, "found a menu item");
                 if(element.getTextString() != null && !element.getTextString().isEmpty())
                 {
-                    rwdebug(3, "element.getTextString() is not empty: " + element.getTextString());
-                    GuiLabel label = new GuiLabel(wordWrap(cleanText(element.getTextString()),30), 0f, current_Y_pos, true);
+                    rwdebug(4, "element.getTextString() is not empty: " + element.getTextString());
+                    GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
                     GuiLabel attribLabel = addLabelAttributes(element, label);
+                    String cleanText = cleanText(element.getTextString());
+                    if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
+                    {
+                        attribLabel.setText(cleanText);
+                    } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
+
                     if (label.getPositionY() == attribLabel.getPositionY())
                     {
                         current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
                         attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
                     }
+                    if (MENUITEM_BULLETS)
+                    {
+                        // create new GuiImage for bullet; shift the label across
+                        GuiImage imgBullet = new GuiImage(
+                                BULLET,
+                                attribLabel.getPositionX(),
+                                attribLabel.getPositionY() + calcHeight(attribLabel) / 2,
+                                true,
+                                32,
+                                32,
+                                false
+                        );
+                        attribLabel.setPosition(attribLabel.getPositionX() + 0.075f, attribLabel.getPositionY(), true);
+                        imgBullet.setPivot(PivotPosition.CenterLeft);
+                        panel.addChild(imgBullet);
+                        player.addGuiElement(imgBullet);
+                        imgBullet.setClickable(true);
+                        imgBullet.setVisible(true);
+                        guiItems.add(imgBullet);
+                    }
                     panel.addChild(attribLabel);
                     player.addGuiElement(attribLabel);
-
                     attribLabel.setClickable(true);
-                    guiItems.add(attribLabel);
                     attribLabel.setVisible(true);
-                    rwdebug(3, "PageBuilder;MenuItem - done with the basics");
-                    rwdebug(3, "PageBuilder;MenuItem - element info");
+                    guiItems.add(attribLabel);
+                    // MIH is only needed for menu items
                     if(!element.getTextString().isEmpty())
-                    { rwdebug(3, element.getTextString()); } else { rwdebug(3, "getTextString is empty."); }
-                    if(!element.getPageNumber().isEmpty())
-                    { rwdebug(3, element.getPageNumber()); } else { rwdebug(3, "getPageNumber is empty."); }
-                    if(attribLabel.getID() != 0)
-                    { rwdebug(3, String.valueOf(attribLabel.getID())); } else { rwdebug(3, "getID is zero."); }
-
-                    // add attribLabel to the menuitems arraylist
-                    rwdebug(3, "PageBuilder;MenuItem - creating a MenuItem()");
-                    MenuItem menuItem = new MenuItem();
-                    if(!attribLabel.getText().isEmpty())
-                    {
-                        rwdebug(3,"PageBuilder;MenuItem - attribLabel.getText()=" + attribLabel.getText());
-                        menuItem.setLinkDocTitle(attribLabel.getText());
-                    } else { rwdebug(3, "PageBuilder;MenuItem;attribLabel.getText() is empty."); }
-                    if (!element.getPageNumber().isEmpty())
-                    {
-                        rwdebug(3, "PageBuilder;MenuItem; getPageNumber() = " + Integer.parseInt(element.getPageNumber()));
-                        rwdebug(3, "PageBuilder;MenuItem; max() = " + max(0, Integer.parseInt(element.getPageNumber())));
-                        menuItem.setPageNum(max(0, Integer.parseInt(element.getPageNumber())));
-                    } else { rwdebug(3, "PageBuilder;MenuItem;element.pageNum is empty."); }
-                    menuItem.setGuiLabel(attribLabel);
-                    // guard against weird null menuitem that's showing up
-                    if (!menuItem.getLinkDocTitle().isEmpty())
-                    {
-
-                        menuitems.add(menuItem);
-                        mih.addMenuItem(attribLabel.getText(), Integer.parseInt(element.getPageNumber()), attribLabel);
-                        rwdebug(3, "MenuItem added to menuItems. size: " + menuitems.size());
-                    }
+                    { mih.addMenuItem(attribLabel.getText(), Integer.parseInt(element.getPageNumber()), attribLabel); }
                 }
-
 
             }
             if (elementType.equals("headline"))
             {
-                GuiLabel label = new GuiLabel(wordWrap(cleanText(element.getTextString()), 30), 0f, current_Y_pos, true);
+                GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
                 GuiLabel attribLabel = addLabelAttributes(element, label);
+                String cleanText = cleanText(element.getTextString());
+                if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
+                {
+                    attribLabel.setText(cleanText);
+                } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
                 if (label.getPositionY() == attribLabel.getPositionY())
                 {
                     current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
@@ -266,16 +331,19 @@ public class rwdocGUI
             }
             if (elementType.equals("text"))
             {
-                String clean = cleanText(element.getTextString());
-                String wrapped = wordWrap(clean, 20);
-
-                GuiLabel label = new GuiLabel(wrapped, 0f, current_Y_pos, true);
+                GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
                 GuiLabel attribLabel = addLabelAttributes(element, label);
+                String cleanText = cleanText(element.getTextString());
+                if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
+                {
+                    attribLabel.setText(cleanText);
+                } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
                 if (label.getPositionY() == attribLabel.getPositionY())
                 {
                     current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
                     attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
                 }
+                rwdebug(3,"ypos1: " + label.getPositionY() + " ypos2: " + attribLabel.getPositionY());
                 panel.addChild(attribLabel);
                 player.addGuiElement(attribLabel);
                 guiItems.add(attribLabel);
@@ -293,10 +361,47 @@ public class rwdocGUI
                     current_Y_pos = current_Y_pos - attribImage.getHeight() - padding;
                     attribImage.setPosition(attribImage.getPositionX(), current_Y_pos, true);
                 }
-                panel.addChild(attribImage);
-                player.addGuiElement(attribImage);
-                guiItems.add(attribImage);
-                attribImage.setVisible(true);
+                if (element.getImageFrame() != null)
+                {
+                    // frame needed. Create the frame; make it a little bigger
+                    // dummy init that will be overwritten by the switch
+                    GuiImage imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
+                    switch (element.getImageFrame()) {
+                        case "1" :
+                            imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
+                            break;
+                        case "2" :
+                            imageFrame = new GuiImage(IMAGE_FRAME_2, 0f, 0f, true, 0f, 0f,false);
+                            break;
+                        case "3" :
+                            imageFrame = new GuiImage(IMAGE_FRAME_3, 0f, 0f, true, 0f, 0f,false);
+                            break;
+                        case "4" :
+                            imageFrame = new GuiImage(IMAGE_FRAME_4, 0f, 0f, true, 0f, 0f,false);
+                            break;
+                    }
+                    imageFrame.setPosition(attribImage.getPositionX(), attribImage.getPositionY(), true);
+                    imageFrame.setSize(attribImage.getWidth(), attribImage.getHeight(), true);
+                    panel.addChild(imageFrame);
+                    player.addGuiElement(imageFrame);
+                    guiItems.add(imageFrame);
+                    imageFrame.setVisible(true);
+                    // stick the image on top of the frame, resize it to fit the frame, then the usual stuff
+                    imageFrame.addChild(attribImage);
+                    attribImage.setSize(0.90f, 0.90f, true);
+                    attribImage.setPosition(0.05f, 0.05f, true);
+                    player.addGuiElement(attribImage);
+                    guiItems.add(attribImage);
+                    attribImage.setVisible(true);
+                } else
+                {
+                    // no frame needed, business as usual
+                    panel.addChild(attribImage);
+                    player.addGuiElement(attribImage);
+                    guiItems.add(attribImage);
+                    attribImage.setVisible(true);
+                }
+
             }
         }
         rwdebug(3, "playerGuiItem size = " + guiItems.size());
@@ -308,16 +413,7 @@ public class rwdocGUI
 
         player.setAttribute("rwdoc_gui_elements_" + panel.getID(), guiItems);
 
-        rwdebug(3, "PageBuilder: let's see what in the menu items map... size: " + menuitems.size());
-        for (MenuItem m : menuitems)
-        {
-            rwdebug(3, "id=" + m + "m=" + m.getLinkDocTitle() + " p=" + m.getPageNum());
-        }
-        rwdebug(3, "about to query the menuitemhandler");
-        mih.queryMenuItems();
-        rwdebug(3, "I have queried the menuitemhandler");
-        player.deleteAttribute("rwdoc_menu_elements");
-        player.setAttribute("rwdoc_menu_elements", menuitems);
+        rwdebug(3, "Assigning MIH to player");
         assignToPlayer(player);
 
     }
@@ -326,40 +422,69 @@ public class rwdocGUI
     {
         if (null != edoc.getTextSize())
         {
+            rwdebug(3, "overriding text size");
             egui.setFontSize(Integer.parseInt(edoc.getTextSize()));
         } else
             {
-                if(edoc.getElementType().equals("menuitem")) { egui.setFontSize(40);}
-                if(edoc.getElementType().equals("headline")) { egui.setFontSize(30);}
-                if(edoc.getElementType().equals("text")) { egui.setFontSize(20);}
+                if(edoc.getElementType().equals("menuitem")) { egui.setFontSize(DEFAULT_MENUITEM_SIZE);}
+                if(edoc.getElementType().equals("headline")) { egui.setFontSize(DEFAULT_HEADLINE_SIZE);}
+                if(edoc.getElementType().equals("text")) { egui.setFontSize(DEFAULT_TEXT_SIZE);}
             }
 
         if (null != edoc.getTextColor())
         {
-            egui.setFontColor((int) Long.parseLong(edoc.getTextSize()));
-        }else { egui.setFontColor(FONTCOLOR); }
+            rwdebug(3, "overriding text color");
+            rwdebug(3, "I'm sure there's a better way to do this.");
+            if(edoc.getTextColor().substring(0,2).toLowerCase().equals("0x"))
+            {
+
+                if(edoc.getTextColor().length() == 8)
+                {
+                    int red = Integer.parseInt(edoc.getTextColor().substring(2,4), 16);
+                    rwdebug(3, "red text value: " + edoc.getTextColor().substring(2,4));
+                    rwdebug(3, "red int value: " + red);
+                    int green = Integer.parseInt(edoc.getTextColor().substring(4,6), 16);
+                    rwdebug(3, "green text value: " + edoc.getTextColor().substring(4,6));
+                    rwdebug(3, "green int value: " + green);
+                    int blue = Integer.parseInt(edoc.getTextColor().substring(6,8), 16);
+                    rwdebug(3, "blue text value: " + edoc.getTextColor().substring(6,8));
+                    rwdebug(3, "blue int value: " + blue);
+                    egui.setFontColor((float) red/255, (float) green/255, (float) blue/255, 1f);
+                } else { rwdebug(2, "Invalid color attribute (short!): " + edoc.getTextColor()); }
+            } else { rwdebug(2, "Invalid color attribute (no 0x): " + edoc.getTextColor()); }
+        } else
+            {
+                // no valid override; using default colour
+                egui.setFontColor(FONTCOLOR); }
 
         if (null != edoc.getxPosition() && null != edoc.getyPosition())
         {
+            rwdebug(3, "overriding xpos");
             egui.setPosition(Float.parseFloat(edoc.getxPosition()), Float.parseFloat(edoc.getyPosition()), true);
         }
 
-        if (null != edoc.getTabstop())
+        if (null != edoc.getIndent())
         {
-            float tabstop = Float.parseFloat(edoc.getTabstop());
-            egui.setPosition(0f + tabstop * 0.1f, egui.getPositionY(), true);
-        }
-
-        if (null != edoc.getPageNumber())
-        {
-            int pageNumber = Integer.parseInt(edoc.getPageNumber());
-            pageNumBuffer = pageNumber;
+            rwdebug(3, "setting an indent");
+            float indent = Float.parseFloat(edoc.getIndent());
+            egui.setPosition(0f + indent * 0.1f, egui.getPositionY(), true);
         }
 
         if (EDITOR)
         {
+            rwdebug(3, "enabling editor highlighting");
             egui.setBorderColor(0x0000FFFF);
             egui.setBorderThickness(1f, false);
+        }
+
+        if (null != edoc.getAlignment())
+        {
+            if(edoc.getAlignment().toLowerCase().equals("center"))
+            {
+                rwdebug(3, "setting center alignment");
+                egui.setPosition(0.5f, egui.getPositionY(), true);
+                egui.setPivot(PivotPosition.CenterBottom);
+            }
         }
 
         return egui;
@@ -394,8 +519,8 @@ public class rwdocGUI
         float result = 0f;
         String input = label.getText();
         int count = input.split(sep,-1).length-1 + 1;
-        rwdebug(4,"calcHeight found \" + count + \" newlines.\"");
-        result = (float) count * label.getFontSize() / 675;
+        rwdebug(4,"calcHeight found " + count + " newlines in " + label.getText());
+        result = (float) count * label.getFontSize() / 660;
         return result;
     }
 
@@ -409,6 +534,10 @@ public class rwdocGUI
         GuiImage button_up = (GuiImage) player.getAttribute("rwdoc_button_up");
         GuiImage button_left = (GuiImage) player.getAttribute("rwdoc_button_left");
         GuiImage button_right = (GuiImage) player.getAttribute("rwdoc_button_right");
+        GuiLabel titleLeft = (GuiLabel) player.getAttribute("rwdoc_titleLeft");
+        GuiLabel titleRight = (GuiLabel) player.getAttribute("rwdoc_titleRight");
+        GuiLabel pageNumLabelLeft = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelLeft");
+        GuiLabel pageNumLabelRight = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight");
         mainPanel.setVisible(value);
         bgImage.setVisible(value);
         pageLeftPanel.setVisible(value);
@@ -417,6 +546,10 @@ public class rwdocGUI
         button_up.setVisible(value);
         button_left.setVisible(value);
         button_right.setVisible(value);
+        titleLeft.setVisible(value);
+        titleRight.setVisible(value);
+        pageNumLabelLeft.setVisible(value);
+        pageNumLabelRight.setVisible(value);
     }
 
 }

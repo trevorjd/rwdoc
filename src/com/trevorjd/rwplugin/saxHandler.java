@@ -7,8 +7,9 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
+import static net.risingworld.api.utils.Utils.StringUtils.isHex;
 
-public class SAXHandler extends DefaultHandler {
+public class saxHandler extends DefaultHandler {
 
     // OK, so this is tricky.
     // Each DocumentPage consists of multiple DocumentElement: title, menuitem, headline, image, text
@@ -33,11 +34,13 @@ public class SAXHandler extends DefaultHandler {
     private String textSize = null;
     private String pageNum = null;
     private String imageFilename = null;
-    private String title;
-    private String imageWidth;
-    private String imageHeight;
-    private String alignment;
-    private String tabstop;
+    private String title = null;
+    private String imageWidth = null;
+    private String imageHeight = null;
+    private String alignment = null;
+    private String indent = null;
+    private String imageFrame = null;
+    private String wrapText = "true";
 
     public ArrayList<DocumentPage> getDocument()
     {
@@ -62,17 +65,18 @@ public class SAXHandler extends DefaultHandler {
                 pageList = new ArrayList<>();
         } else if (qName.equalsIgnoreCase("title"))
         {
-            tabstop = attributes.getValue("tab");
+            //indent = attributes.getValue("tab");
             bTitle = true;
         } else if (qName.equalsIgnoreCase("menuitem"))
         {
-            tabstop = attributes.getValue("tab");
+            indent = attributes.getValue("tab");
             alignment = attributes.getValue("align");
             pageNum = attributes.getValue("page");
+            wrapText = attributes.getValue("wrap");
             bMenuItem = true;
         } else if (qName.equalsIgnoreCase("headline"))
         {
-            tabstop = attributes.getValue("tab");
+            indent = attributes.getValue("tab");
             alignment = attributes.getValue("align");
             posx = attributes.getValue("posx");
             posy = attributes.getValue("posy");
@@ -80,6 +84,7 @@ public class SAXHandler extends DefaultHandler {
             {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             textColor = attributes.getValue("color");
             textSize = attributes.getValue("size");
+            wrapText = attributes.getValue("wrap");
             bHeadline = true;
         } else if (qName.equalsIgnoreCase("text"))
         {
@@ -90,6 +95,7 @@ public class SAXHandler extends DefaultHandler {
             {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             textColor = attributes.getValue("color");
             textSize = attributes.getValue("size");
+            wrapText = attributes.getValue("wrap");
             bText = true;
         } else if (qName.equalsIgnoreCase("image"))
         {
@@ -100,6 +106,7 @@ public class SAXHandler extends DefaultHandler {
             {rwdebug(2, "posx/posy pair incomplete in: \" + title");};
             imageWidth = attributes.getValue("width");
             imageHeight = attributes.getValue("height");
+            imageFrame = attributes.getValue("frame");
             if (((imageWidth != null) && (imageHeight == null)) || ((imageHeight != null) && (imageWidth == null)))
             {rwdebug(2, "width/height pair incomplete in: " + title);};
             imageFilename = attributes.getValue("filename");
@@ -120,16 +127,6 @@ public class SAXHandler extends DefaultHandler {
         if (bTitle) {
             DocumentElement element = new DocumentElement();
             element.setElementType("title");
-            if(null != posx)
-                element.setxPosition(posx);
-            if(null != posy)
-                element.setyPosition(posy);
-            if(null != textColor)
-                element.setTextColor(textColor);
-            if(null != textSize)
-                element.setTextSize(textSize);
-            if(null != tabstop)
-                element.setTabstop(tabstop);
             element.setTextString(new String(ch, start, length));
             rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString());
             page.addElement(element);
@@ -145,14 +142,18 @@ public class SAXHandler extends DefaultHandler {
             if(null != posy)
                 element.setyPosition(posy);
             if(null != textColor)
-                element.setTextColor(textColor);
+                if(isHex(textColor)) { element.setTextColor(textColor); }
+                else { rwdebug(2, "Invalid color attribute: " + textColor); }
             if(null != textSize)
                 element.setTextSize(textSize);
-            if(null != tabstop)
-                element.setTabstop(tabstop);
+            if(null != indent)
+                element.setIndent(indent);
+            if(null != wrapText)
+                element.setWrapText(wrapText);
             element.setPageNumber(pageNum);
             element.setTextString(new String(ch, start, length));
-            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " tabstop: " + element.getTabstop());
+            rwdebug(1, new String(ch, start, length));
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " indent: " + element.getIndent());
             page.addElement(element);
             bMenuItem = false;
             clearVars();
@@ -165,13 +166,18 @@ public class SAXHandler extends DefaultHandler {
             if(null != posy)
                 element.setyPosition(posy);
             if(null != textColor)
-                element.setTextColor(textColor);
+                if(isHex(textColor)) { element.setTextColor(textColor); }
+                    else { rwdebug(2, "Invalid color attribute: " + textColor); }
             if(null != textSize)
                 element.setTextSize(textSize);
-            if(null != tabstop)
-                element.setTabstop(tabstop);
+            if(null != indent)
+                element.setIndent(indent);
+            if(null != alignment)
+                element.setAlignment(alignment);
+            if(null != wrapText)
+                element.setWrapText(wrapText);
             element.setTextString(new String(ch, start, length));
-            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " tabstop: " + element.getTabstop());
+            rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString() + " indent: " + element.getIndent());
             page.addElement(element);
             bHeadline = false;
             clearVars();
@@ -184,9 +190,14 @@ public class SAXHandler extends DefaultHandler {
             if(null != posy)
                 element.setyPosition(posy);
             if(null != textColor)
-                element.setTextColor(textColor);
+                if(isHex(textColor)) { element.setTextColor(textColor); }
+                else { rwdebug(2, "Invalid color attribute: " + textColor); }
             if(null != textSize)
                 element.setTextSize(textSize);
+            if(null != alignment)
+                element.setAlignment(alignment);
+            if(null != wrapText)
+                element.setWrapText(wrapText);
             element.setTextString(new String(ch, start, length));
             rwdebug(4, "SAX Add type: " + element.getElementType() + " text: " + element.getTextString());
             page.addElement(element);
@@ -212,6 +223,8 @@ public class SAXHandler extends DefaultHandler {
                 element.setImageHeight(imageHeight);
             if(null != alignment)
                 element.setAlignment(alignment);
+            if(null != imageFrame)
+                element.setImageFrame(imageFrame);
             rwdebug(4, "SAX Add type: " + element.getElementType() + " filename: " + element.getFileName());
             page.addElement(element);
             bImage = false;
@@ -231,8 +244,11 @@ public class SAXHandler extends DefaultHandler {
         imageHeight = null;
         alignment = null;
         pageNum = null;
-        tabstop = null;
+        indent = null;
+        imageFrame = null;
+        wrapText = "true";
     }
+
 }
 
 

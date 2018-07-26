@@ -13,8 +13,10 @@ public class DocumentElement
     private String imageWidth;
     private String imageHeight;
     private String alignment;
-    private String tabstop;
+    private String indent;
     private String docTitle;
+    private String imageFrame;
+    private String wrapText;
 
     public DocumentElement()
     {
@@ -73,14 +75,24 @@ public class DocumentElement
         this.imageWidth = imageWidth;
     }
 
-    public void setTabstop(String tabstop)
+    public void setIndent(String indent)
     {
-        this.tabstop = tabstop;
+        this.indent = indent;
     }
 
     public void setDocTitle(String docTitle)
     {
         this.docTitle = docTitle;
+    }
+
+    public void setImageFrame(String imageFrame)
+    {
+        this.imageFrame = imageFrame;
+    }
+
+    public void setWrapText(String wrapText)
+    {
+        this.wrapText = wrapText;
     }
 
     // getters
@@ -134,10 +146,20 @@ public class DocumentElement
         return imageWidth;
     }
 
-    public String getTabstop() { return tabstop; }
+    public String getIndent() { return indent; }
 
     public String getDocTitle()
     {
         return docTitle;
+    }
+
+    public String getImageFrame()
+    {
+        return imageFrame;
+    }
+
+    public String getWrapText()
+    {
+        return wrapText;
     }
 }

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import static com.trevorjd.rwplugin.rwdoc.EXTSEARCH;
 import static com.trevorjd.rwplugin.rwdoc.PLUGINSFOLDER;
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 
@@ -16,7 +17,7 @@ public class RwdocLibrary
     // and builds them into an RwdocLibrary object
     private static SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
-    private static ArrayList<RwdocDocument> library = new ArrayList<RwdocDocument>();
+    private static ArrayList<RwdocDocument> library;
 
     public RwdocLibrary()
     {
@@ -60,10 +61,21 @@ public class RwdocLibrary
 
     public static void buildLibrary()
     {
+        ArrayList<RwdocDocument> backup = new ArrayList<RwdocDocument>();
+        if (library != null)
+        {
+             backup = (ArrayList<RwdocDocument>) library.clone();
+        }
+        library = new ArrayList<RwdocDocument>();
         ArrayList<File> files = new ArrayList<File>();
         files = getFiles();
-        parseFileList(files);
-        setupDefaultDocument();
+        if (!parseFileList(files))
+        {
+            rwdebug(2, "Failed to load all XML files. See log for details. Reverting to old library.");
+            library.clear();
+            library = (ArrayList<RwdocDocument>) backup.clone();
+        } else { setupDefaultDocument(); }
+
     }
 
     public static ArrayList<File> getFiles()
@@ -74,8 +86,15 @@ public class RwdocLibrary
         rwdebug(3, "Initialising library");
         try
         {
-            rwdebug(3, "Searching for files in: " + PLUGINSFOLDER);
-            Files.walk(Paths.get(PLUGINSFOLDER))
+            // respect 'search other plugins' setting
+            String filePath;
+            if (EXTSEARCH)
+            {
+                filePath = PLUGINSFOLDER;
+            } else { filePath = PLUGINSFOLDER + "/rwdoc"; }
+
+            rwdebug(3, "Searching for files in: " + filePath);
+            Files.walk(Paths.get(filePath))
                     .filter(Files::isRegularFile)
                     .forEach((f) -> {
                         String file = f.toString();
@@ -99,26 +118,32 @@ public class RwdocLibrary
         return files;
     }
 
-
-    public static void parseFileList(ArrayList<File> files)
+    public static boolean parseFileList(ArrayList<File> files)
     {
+        boolean success = false;
         for (File file : files)
         try
         {
             rwdebug(3, "Parsing file - " + file.getPath());
             SAXParser saxParser = saxParserFactory.newSAXParser();
-            SAXHandler handler = new SAXHandler();
+            saxHandler handler = new saxHandler();
             saxParser.parse(file, handler);
             RwdocDocument document = new RwdocDocument(handler.getTitle(), handler.getDocument());
-            rwdebug(3, "docpathfull=" + file.getPath());
-            rwdebug(3, "docpath=" + file.getPath().substring(0,file.getPath().lastIndexOf(File.separator)));
+            rwdebug(4, "docpathfull=" + file.getPath());
+            rwdebug(4, "docpath=" + file.getPath().substring(0,file.getPath().lastIndexOf(File.separator)));
             document.setDocumentPath(file.getPath().substring(0,file.getPath().lastIndexOf(File.separator)));
-
-            addDocument(document);
+            if (document.getDocumentTitle() == null)
+            {
+                rwdebug(2, "Document is missing a title tag! File: " + file.getPath());
+            } else { addDocument(document); }
+            rwdebug(3,"No fatal errors loading: " + file.getName());
+            success = true;
         } catch (Exception e)
         {
-            e.printStackTrace();
+            rwdebug(2, "Error processing file: " + file.getPath());
+            rwdebug(2, e.getMessage());
         }
+        return success;
     }
 
     public static void setupDefaultDocument()
@@ -141,7 +166,7 @@ public class RwdocLibrary
             page1 = new DocumentPage();
             DocumentElement element = new DocumentElement();
             element.setElementType("headline");
-            element.setTabstop("3");
+            element.setIndent("3");
             element.setTextString("No default document found!");
 
         } else

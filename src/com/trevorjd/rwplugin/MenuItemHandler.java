@@ -31,11 +31,11 @@ public class MenuItemHandler
 
     public static void queryMenuItems()
     {
-        rwdebug(3, "menuitemhandler: summoned, I come");
+        rwdebug(4, "MIH: querying contents");
 
         for (int count = 0; count < docLinks.size(); count++)
         {
-            rwdebug(3, String.format("------MIH: queryMenuItems------ link: %s page: %d id: %d\n",
+            rwdebug(4, String.format("MIH: link: %s page: %d id: %d\n",
                     docLinks.get(count),
                     pageNums.get(count),
                     guiLabels.get(count).getID()
