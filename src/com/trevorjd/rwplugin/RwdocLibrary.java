@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import static com.trevorjd.rwplugin.XMLParser.parseXMLFile;
 import static com.trevorjd.rwplugin.rwdoc.EXTSEARCH;
 import static com.trevorjd.rwplugin.rwdoc.PLUGINSFOLDER;
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
@@ -15,7 +16,7 @@ public class RwdocLibrary
 {
     // This class searches the Rising World plugins folder for rwdoc.xml files
     // and builds them into an RwdocLibrary object
-    private static SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+    //private static SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
     private static ArrayList<RwdocDocument> library;
 
@@ -74,7 +75,29 @@ public class RwdocLibrary
             rwdebug(2, "Failed to load all XML files. See log for details. Reverting to old library.");
             library.clear();
             library = (ArrayList<RwdocDocument>) backup.clone();
-        } else { setupDefaultDocument(); }
+        } else {
+            RwdocDocument doc0 = library.get(0);
+            if(doc0 != null)
+            {
+                rwdebug(1, "doc0: " + doc0.getDocumentTitle());
+            }
+            RwdocDocument doc1 = library.get(1);
+            if(doc1 != null)
+            {
+                rwdebug(1, "doc1: " + doc1.getDocumentTitle());
+            }
+            RwdocDocument doc2 = library.get(2);
+            if(doc2 != null)
+            {
+                rwdebug(1, "doc2: " + doc2.getDocumentTitle());
+            }
+            RwdocDocument doc3 = library.get(3);
+            if(doc3 != null)
+            {
+                rwdebug(1, "doc3: " + doc3.getDocumentTitle());
+            }
+
+            setupDefaultDocument(); }
 
     }
 
@@ -124,6 +147,7 @@ public class RwdocLibrary
         for (File file : files)
         try
         {
+            /*
             rwdebug(3, "Parsing file - " + file.getPath());
             SAXParser saxParser = saxParserFactory.newSAXParser();
             saxHandler handler = new saxHandler();
@@ -136,14 +160,21 @@ public class RwdocLibrary
             {
                 rwdebug(2, "Document is missing a title tag! File: " + file.getPath());
             } else { addDocument(document); }
+            */
+            rwdebug(1, "Sending a file to get parsed.");
+            RwdocDocument document = parseXMLFile(file.getPath());
+            rwdebug(1, "Document title is... " + document.getDocumentTitle());
+            library.add(document);
             rwdebug(3,"No fatal errors loading: " + file.getName());
             success = true;
         } catch (Exception e)
         {
             rwdebug(2, "Error processing file: " + file.getPath());
             rwdebug(2, e.getMessage());
+            e.printStackTrace();
         }
         return success;
+
     }
 
     public static void setupDefaultDocument()

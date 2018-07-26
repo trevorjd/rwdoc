@@ -80,7 +80,6 @@ public class rwdocUtils
     private static final String newline = System.getProperty("line.separator");
 
     public static String wordWrap(String text, int fontSize) {
-        rwdebug(3, "wrapping... fontSize: " + fontSize);
         // calculate wrapping width based on font size
         int linelength;
         if (fontSize <= 10) { linelength = Integer.parseInt(c.getProperty("font_10pt_wrap_length")); } else
@@ -97,43 +96,34 @@ public class rwdocUtils
         if (fontSize <= 65) { linelength = Integer.parseInt(c.getProperty("font_65pt_wrap_length")); } else
         if (fontSize <= 70) { linelength = Integer.parseInt(c.getProperty("font_70pt_wrap_length")); } else
             linelength = 5;
-        rwdebug(3, "wrapping fontSize: " + fontSize + " at ll: " + linelength);
-        rwdebug(4, "removing tabs...");
         // Replace tabs with newlines because tabs mess up GuiLabels
         if(text.length() > 0)
         {
             text.replace('\t', '\n');
         }
-        rwdebug(4, "about to trim the lead...");
-        rwdebug(4, "trimming the lead... : " + text);
         // Trim leading newlines and spaces
         while((text.length() > 0) && (text.charAt(0) == ' ' || text.charAt(0) == '\n'))
             text = text.substring(1);
 
-        rwdebug(4, "returning shorty...");
         // If Small Enough Already, Return Original
         if(text.length() < linelength)
             return text;
 
-        rwdebug(4, "splitting...");
         // If Next length Contains Newline, Split There
         if(text.substring(0, linelength).contains(newline))
             return text.substring(0, text.indexOf(newline)).trim() + newline +
                     wordWrap(text.substring(text.indexOf(newline) + 1), fontSize);
 
-        rwdebug(4, "more splitting...");
         // Otherwise, Split Along Nearest Previous Space/Tab/Dash
         int spaceIndex = Math.max(Math.max( text.lastIndexOf(" ",  linelength),
                 text.lastIndexOf("\t", linelength)),
                 text.lastIndexOf("-",  linelength));
 
-        rwdebug(4, "splitting run-on...");
         // If No Nearest Space, Split At length
         if(spaceIndex == -1)
             spaceIndex = linelength;
 
         // Split
-        rwdebug(4, "returning...");
         return text.substring(0, spaceIndex).trim() + newline + wordWrap(text.substring(spaceIndex), fontSize);
     }
 }

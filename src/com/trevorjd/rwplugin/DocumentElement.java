@@ -17,6 +17,7 @@ public class DocumentElement
     private String docTitle;
     private String imageFrame;
     private String wrapText;
+    private String pivot;
 
     public DocumentElement()
     {
@@ -95,6 +96,11 @@ public class DocumentElement
         this.wrapText = wrapText;
     }
 
+    public void setPivot(String pivot)
+    {
+        this.pivot = pivot;
+    }
+
     // getters
 
     public String getxPosition()
@@ -161,5 +167,10 @@ public class DocumentElement
     public String getWrapText()
     {
         return wrapText;
+    }
+
+    public String getPivot()
+    {
+        return pivot;
     }
 }

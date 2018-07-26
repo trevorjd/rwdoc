@@ -57,7 +57,6 @@ public class propertiesHandler
 
     private static String cleanProperty(Properties properties, String property)
     {
-        rwdebug(3, "providing default property if not already in the file");
         String result;
         Properties defProp = getDefaultConfig();
         if (properties.getProperty(property) != null)
@@ -72,7 +71,6 @@ public class propertiesHandler
 
     private static Properties getDefaultConfig()
     {
-        rwdebug(3, "supplying default config");
         Properties p = new Properties();
         p.setProperty("activation_command", "help");
         p.setProperty("refresh_command", "refreshrwdoc");
