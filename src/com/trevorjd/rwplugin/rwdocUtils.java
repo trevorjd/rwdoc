@@ -24,6 +24,10 @@ public class rwdocUtils
         IMAGE_FRAME_2 = new ImageInformation(plugin, IMGDIR + "frame_2.png");
         IMAGE_FRAME_3 = new ImageInformation(plugin, IMGDIR + "frame_3.png");
         IMAGE_FRAME_4 = new ImageInformation(plugin, IMGDIR + "frame_4.png");
+        TICK = new ImageInformation(plugin, IMGDIR + "greentick.png");
+        CROSS = new ImageInformation(plugin, IMGDIR + "redx.png");
+        HRULE = new ImageInformation(plugin, IMGDIR + "hrule.png");
+        VRULE = new ImageInformation(plugin, IMGDIR + "vrule.png");
         FONTCOLOR = 0x30201370;
         PLUGINSFOLDER = plugin.getPath().substring(0,plugin.getPath().lastIndexOf(File.separator));
 
@@ -31,11 +35,13 @@ public class rwdocUtils
         EXTSEARCH = Boolean.valueOf(c.getProperty("search_all_plugins"));
         LOGLEVEL = Integer.parseInt(c.getProperty("log_level"));
         ACTIVATION_CMD = String.valueOf(c.getProperty("activation_command"));
+        REFRESH_ENABLED = Boolean.valueOf(c.getProperty("refresh_enabled"));
+        EDITOR_ENABLED = Boolean.valueOf(c.getProperty("editor_enabled"));
         REFRESH_CMD = String.valueOf(c.getProperty("refresh_command"));
-        EDITOR = Boolean.valueOf(c.getProperty("editor_mode"));
-        DEFAULT_HEADLINE_SIZE = Integer.parseInt(c.getProperty("default_headline_size"));
-        DEFAULT_MENUITEM_SIZE = Integer.parseInt(c.getProperty("default_menuitem_size"));
-        DEFAULT_TEXT_SIZE = Integer.parseInt(c.getProperty("default_text_size"));
+        EDITOR_CMD = String.valueOf(c.getProperty("editor_command"));
+        DEFAULT_HEADLINE_SIZE = Integer.parseInt(c.getProperty("text_size_headline"));
+        DEFAULT_MENUITEM_SIZE = Integer.parseInt(c.getProperty("text_size_menuitem"));
+        DEFAULT_TEXT_SIZE = Integer.parseInt(c.getProperty("text_size_text"));
         MENUITEM_BULLETS = Boolean.valueOf(c.getProperty("menuitem_bullets"));
 
         rwdoc.RWDOC_LIBRARY = new RwdocLibrary();
@@ -48,6 +54,16 @@ public class rwdocUtils
             rwdebug(2, "Failed to load config & failed to create a new config file.");
         }
         return success;
+    }
+
+    public static boolean cmpF(Float float1, Float float2)
+    {
+        boolean result;
+        if (Math.abs(float1 - float2) < THRESHOLD)
+            result = true;
+        else
+            result = false;
+        return result;
     }
 
     public static void rwdebug(int logLevel, String message)

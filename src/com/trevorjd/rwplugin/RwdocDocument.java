@@ -1,6 +1,9 @@
 package com.trevorjd.rwplugin;
 
+import javax.print.Doc;
 import java.util.ArrayList;
+
+import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 
 public class RwdocDocument
 {
@@ -24,9 +27,23 @@ public class RwdocDocument
         pageList.add(page);
     }
 
-    public DocumentPage getPagebyIndex(int pageIndex)
+    public DocumentPage getPagebyIndex(String pageIndex)
     {
-        return pageList.get(pageIndex);
+        DocumentPage result = null;
+        for (int count = 0; count < pageList.size(); count++)
+        {
+            if(pageList.get(count).getPageIndex().equals(pageIndex))
+            {
+                result = pageList.get(count);
+                result.setPageNumber(count);
+            }
+        }
+        return result;
+    }
+
+    public DocumentPage getPagebyNumber(int pageNumber)
+    {
+        return pageList.get(pageNumber);
     }
 
     public void setPageList(ArrayList<DocumentPage> pageList)

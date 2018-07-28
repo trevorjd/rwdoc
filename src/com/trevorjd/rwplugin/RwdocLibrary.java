@@ -1,7 +1,5 @@
 package com.trevorjd.rwplugin;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -10,6 +8,7 @@ import java.util.ArrayList;
 import static com.trevorjd.rwplugin.XMLParser.parseXMLFile;
 import static com.trevorjd.rwplugin.rwdoc.EXTSEARCH;
 import static com.trevorjd.rwplugin.rwdoc.PLUGINSFOLDER;
+import static com.trevorjd.rwplugin.rwdoc.c;
 import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 
 public class RwdocLibrary
@@ -27,8 +26,9 @@ public class RwdocLibrary
 
     public static void addDocument(RwdocDocument document)
     {
+        rwdebug(3, "addDocument() received: " + document.getDocumentTitle() + " with " + document.getNumberofPages() + " pages.");
         library.add(document);
-        rwdebug(3, "Added doc to library: " + document.getDocumentTitle() + "; Now contains " + library.size() + " documents.");
+        rwdebug(3, "Added doc to library: " + document.getDocumentTitle() + "; Library now contains " + library.size() + " documents.");
     }
 
     public static ArrayList<RwdocDocument> getLibrary()
@@ -52,7 +52,6 @@ public class RwdocLibrary
     public static ArrayList<String> getTitleList()
     {
         ArrayList<String> result = new ArrayList<String>();
-
         for (int count = 0; count < library.size(); count++)
         {
             result.add(library.get(count).getDocumentTitle());
@@ -62,46 +61,14 @@ public class RwdocLibrary
 
     public static void buildLibrary()
     {
-        ArrayList<RwdocDocument> backup = new ArrayList<RwdocDocument>();
-        if (library != null)
-        {
-             backup = (ArrayList<RwdocDocument>) library.clone();
-        }
         library = new ArrayList<RwdocDocument>();
         ArrayList<File> files = new ArrayList<File>();
         files = getFiles();
-        if (!parseFileList(files))
-        {
-            rwdebug(2, "Failed to load all XML files. See log for details. Reverting to old library.");
-            library.clear();
-            library = (ArrayList<RwdocDocument>) backup.clone();
-        } else {
-            RwdocDocument doc0 = library.get(0);
-            if(doc0 != null)
-            {
-                rwdebug(1, "doc0: " + doc0.getDocumentTitle());
-            }
-            RwdocDocument doc1 = library.get(1);
-            if(doc1 != null)
-            {
-                rwdebug(1, "doc1: " + doc1.getDocumentTitle());
-            }
-            RwdocDocument doc2 = library.get(2);
-            if(doc2 != null)
-            {
-                rwdebug(1, "doc2: " + doc2.getDocumentTitle());
-            }
-            RwdocDocument doc3 = library.get(3);
-            if(doc3 != null)
-            {
-                rwdebug(1, "doc3: " + doc3.getDocumentTitle());
-            }
-
-            setupDefaultDocument(); }
-
+        parseFileList(files);
+        setupDefaultDocument();
     }
 
-    public static ArrayList<File> getFiles()
+    private static ArrayList<File> getFiles()
     {
         ArrayList<File> files = new ArrayList<File>();
 
@@ -116,7 +83,6 @@ public class RwdocLibrary
                 filePath = PLUGINSFOLDER;
             } else { filePath = PLUGINSFOLDER + "/rwdoc"; }
 
-            rwdebug(3, "Searching for files in: " + filePath);
             Files.walk(Paths.get(filePath))
                     .filter(Files::isRegularFile)
                     .forEach((f) -> {
@@ -141,31 +107,17 @@ public class RwdocLibrary
         return files;
     }
 
-    public static boolean parseFileList(ArrayList<File> files)
+    private static boolean parseFileList(ArrayList<File> files)
     {
         boolean success = false;
+
         for (File file : files)
         try
         {
-            /*
-            rwdebug(3, "Parsing file - " + file.getPath());
-            SAXParser saxParser = saxParserFactory.newSAXParser();
-            saxHandler handler = new saxHandler();
-            saxParser.parse(file, handler);
-            RwdocDocument document = new RwdocDocument(handler.getTitle(), handler.getDocument());
-            rwdebug(4, "docpathfull=" + file.getPath());
-            rwdebug(4, "docpath=" + file.getPath().substring(0,file.getPath().lastIndexOf(File.separator)));
-            document.setDocumentPath(file.getPath().substring(0,file.getPath().lastIndexOf(File.separator)));
-            if (document.getDocumentTitle() == null)
-            {
-                rwdebug(2, "Document is missing a title tag! File: " + file.getPath());
-            } else { addDocument(document); }
-            */
-            rwdebug(1, "Sending a file to get parsed.");
-            RwdocDocument document = parseXMLFile(file.getPath());
-            rwdebug(1, "Document title is... " + document.getDocumentTitle());
-            library.add(document);
-            rwdebug(3,"No fatal errors loading: " + file.getName());
+            rwdebug(3, "Parsing file: " + file.getPath());
+            RwdocDocument document = new RwdocDocument();
+            document = parseXMLFile(file.getPath());
+            addDocument(document);
             success = true;
         } catch (Exception e)
         {
@@ -174,77 +126,126 @@ public class RwdocLibrary
             e.printStackTrace();
         }
         return success;
-
     }
 
-    public static void setupDefaultDocument()
+    private static void setupDefaultDocument()
     {
         // by this point, we have all documents loaded
         // now we need to get a list of titles and build the the menu list and default front page
+        RwdocDocument document = new RwdocDocument();
+        RwdocDocument newDoc = new RwdocDocument();
         ArrayList<String> titleList = getTitleList();
+        boolean foundDefaultDoc = false;
         for (String s : titleList)
         {
-            rwdebug(3, "Library contains: " + s);
+            if(s.toLowerCase().equals("default"))
+            {
+                foundDefaultDoc = true;
+            }
         }
-        RwdocDocument document = getDocumentbyTitle("default");
-        String filepath = document.getDocumentPath();
-        DocumentPage page0;
-        DocumentPage page1;
-        if (null == document)
+        if (!foundDefaultDoc)
         {
             rwdebug(2, "No default document found!");
-            page0 = new DocumentPage();
-            page1 = new DocumentPage();
+            document.setDocumentTitle("default");
+            DocumentPage page0 = new DocumentPage();
+            DocumentPage page1 = new DocumentPage();
+            page0.setPageNumber(0);
+            newDoc.addPage(page0);
             DocumentElement element = new DocumentElement();
             element.setElementType("headline");
-            element.setIndent("3");
-            element.setTextString("No default document found!");
-
+            element.setPivot("center");
+            element.setxPosition("0.5");
+            element.setyPosition("0.5");
+            element.setTextString(c.getProperty("msg_no_default_document"));
+            page1.addElement(element);
+            page1.setPageNumber(1);
+            newDoc.addPage(page1);
         } else
         {
-            page0 = document.getPagebyIndex(0);
-            if(null == page0)
+            document = getDocumentbyTitle("default");
+            DocumentPage page0 = document.getPagebyNumber(0);
+            if(page0 == null)
             {
-                rwdebug(2, "Default document incomplete. Missing Page 0");
+                rwdebug(2, "Default document incomplete. Missing Page 0.");
                 page0 = new DocumentPage();
-            }
-            page1 = document.getPagebyIndex(1);
+                DocumentElement element = new DocumentElement();
+                element.setElementType("title");
+                element.setDocTitle("default");
+                page0.addElement(element);
+                page0.setPageNumber(0);
+                newDoc.addPage(page0);
+            } else
+                if(page0.getTitle() == null)
+                {
+                    // page 0 exists but can't provide a title. Nuke it and build a clean one.
+                    rwdebug(2, "Default document incomplete. Page 0 exists but missing <title> tag.");
+                    page0 = new DocumentPage();
+                    DocumentElement element = new DocumentElement();
+                    element.setElementType("title");
+                    element.setDocTitle("default");
+                    element.setTextString("default");
+                    page0.addElement(element);
+                    page0.setPageNumber(0);
+                    newDoc.addPage(page0);
+                } else { newDoc.addPage(page0); }
+
+            DocumentPage page1 = document.getPagebyNumber(1);
             if(null == page1)
             {
-                rwdebug(2, "Default document incomplete. Missing Page 1");
+                rwdebug(2, "Default document incomplete. Page 1 does not exist.");
                 page1 = new DocumentPage();
-            }
+                DocumentElement element = new DocumentElement();
+                element.setElementType("headline");
+                element.setTextString("Default document is incomplete.");
+                element.setPivot("centrebottom");
+                page1.addElement(element);
+                element = new DocumentElement();
+                element.setElementType("headline");
+                element.setTextString("Page 1 does not exist.");
+                element.setPivot("centrebottom");
+                page1.addElement(element);
+                page1.setPageNumber(1);
+                newDoc.addPage(page1);
+            } else { newDoc.addPage(page1); }
         }
+        // By this point we (should) have assured the existence of a document that contains
+        // two pages. Page 0 has a title element and the document has a title.
+        newDoc.setDocumentTitle("default");
+        newDoc.setDocumentPath(document.getDocumentPath());
+        // remove the old default doc and replace it with the new one
+        removeDocumentByTitle("default");
+        addDocument(newDoc);
+
+        // Now we'll retrieve whatever's in memory, build a version with menu items, and replace with that.
+        document = getDocumentbyTitle("default");
+        newDoc = new RwdocDocument();
+        DocumentPage page0 = document.getPagebyNumber(0);
+        DocumentPage page1 = document.getPagebyNumber(1);
 
         for (int count = 0; count < titleList.size(); count++)
         {
-            rwdebug(3, "page 0 size: " + page0.getNumberofElements());
+            // iterate titleList; create a menu item for each; add it to page0
             DocumentElement element = new DocumentElement();
             element.setElementType("menuitem");
             if(!titleList.get(count).equals("default")) // exclude itself
             {
                 element.setTextString(titleList.get(count));
-                element.setPageNumber("0");
-                rwdebug(3, "Added menuitem to default document: " + element.getTextString() + " Page: " + element.getPageNumber());
+                element.setPageIndex("start");
             } else { rwdebug(3, "exluding default doc from menulist"); }
             page0.addElement(element);
         }
-        RwdocDocument newDoc = new RwdocDocument();
-        newDoc.setDocumentTitle("default");
         newDoc.addPage(page0);
         newDoc.addPage(page1);
+        newDoc.setDocumentTitle("default");
+        newDoc.setDocumentPath(document.getDocumentPath());
+        // remove the old default doc and replace it with the new one
         removeDocumentByTitle("default");
-        newDoc.setDocumentPath(filepath);
         addDocument(newDoc);
-        for (String s : titleList)
-        {
-            rwdebug(3, "Library contains: " + s);
-        }
     }
 
     private static void removeDocumentByTitle(String titleToRemove)
     {
-        rwdebug(3, "Removing document by title: " + titleToRemove);
+        // if a specified document exists, remove it.
         for (int count = 0; count < library.size(); count++)
         {
             if (library.get(count).getDocumentTitle().equals(titleToRemove))

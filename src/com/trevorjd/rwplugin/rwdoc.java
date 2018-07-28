@@ -7,6 +7,7 @@ import net.risingworld.api.events.player.PlayerConnectEvent;
 import net.risingworld.api.events.player.PlayerSpawnEvent;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.ImageInformation;
+import net.risingworld.api.utils.KeyInput;
 
 import java.util.Properties;
 
@@ -66,7 +67,9 @@ public class rwdoc extends Plugin implements Listener
     // Globals - hardwired
     public static Properties c = null; // config options in here
     protected static rwdoc plugin;
+    protected static boolean EDITOR; //plugin is in editor mode - show label borders
     protected static final String IMGDIR = "/images/";
+    protected static final double THRESHOLD = .0001;
     protected static ImageInformation BGIMAGE;
     protected static ImageInformation HITBOXIMAGE;
     protected static ImageInformation BULLET;
@@ -74,20 +77,28 @@ public class rwdoc extends Plugin implements Listener
     protected static ImageInformation IMAGE_FRAME_2;
     protected static ImageInformation IMAGE_FRAME_3;
     protected static ImageInformation IMAGE_FRAME_4;
+    protected static ImageInformation HRULE;
+    protected static ImageInformation VRULE;
+    protected static ImageInformation TICK;
+    protected static ImageInformation CROSS;
     protected static String PLUGINSFOLDER; // location of RW plugins folder for searching other plugins
     protected static String DEFAULT_TITLE = "rwDoc - Documentation for a Rising World";
 
     // Globals - init with config file
-    protected static boolean EDITOR; //plugin is in editor mode - show label borders
+    protected static String EDITOR_CMD; // activation command for editor mode
     protected static boolean EXTSEARCH; //search 3rd party plugin folders for rwdoc/rwdoc.xml
     protected static int FONTCOLOR;
     protected static int LOGLEVEL = 3; //give it a default value so that it works when loading properties
-    protected static String ACTIVATION_CMD;
-    protected static String REFRESH_CMD;
+    protected static String ACTIVATION_CMD; // activation command for plugin
+    protected static String REFRESH_CMD; // activation command for library refresh
     protected static int DEFAULT_HEADLINE_SIZE = 30;
     protected static int DEFAULT_MENUITEM_SIZE = 40;
     protected static int DEFAULT_TEXT_SIZE = 20;
     protected static boolean MENUITEM_BULLETS;
+    protected static boolean EDITOR_ENABLED;
+    protected static boolean REFRESH_ENABLED;
+    protected static boolean VERSION_CHECKING;
+    protected static boolean VERSION_ANNOUNCEMENT;
 
     // Shared resources
     protected static RwdocLibrary RWDOC_LIBRARY;
@@ -127,8 +138,8 @@ public class rwdoc extends Plugin implements Listener
     {
         Player player = event.getPlayer();
         player.setAttribute("guiVisible", false);
-        //player.setListenForKeyInput(true);
-        //player.registerKeys(KeyInput.KEY_Y);
+        player.setListenForKeyInput(true);
+        player.registerKeys(KeyInput.KEY_ESCAPE);
     }
 
 }

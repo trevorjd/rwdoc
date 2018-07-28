@@ -1,5 +1,6 @@
 package com.trevorjd.rwplugin;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -19,8 +20,7 @@ import static com.trevorjd.rwplugin.rwdocUtils.rwdebug;
 import static net.risingworld.api.utils.Utils.StringUtils.isHex;
 
 public class XMLParser {
-    private static RwdocDocument document = new RwdocDocument();
-    private static ArrayList<DocumentPage> pageList = new ArrayList<DocumentPage>();
+
     private static DocumentPage page;
 
     // bools for flagging during parsing
@@ -35,7 +35,7 @@ public class XMLParser {
     private static String posy = null;
     private static String textColor = null;
     private static String textSize = null;
-    private static String pageNum = null;
+    private static String pageIndex = null;
     private static String imageFilename = null;
     private static String title = null;
     private static String imageWidth = null;
@@ -46,17 +46,16 @@ public class XMLParser {
     private static String wrapText = "true";
     private static String pivot = null;
 
-    public String getTitle()
-    {
-        return title;
-    }
-
     public static RwdocDocument parseXMLFile(String fileName)
     {
-        rwdebug(3, "XML Parser; Hi there! I'll be your parser for today.");
-        rwdebug(3, "May I recommend the " + fileName + "?");
+        ArrayList<DocumentPage> pageList = new ArrayList<DocumentPage>();
+
+        rwdebug(3, "parseXMLFile Received: " + fileName);
+        RwdocDocument document = new RwdocDocument();
+        int pageNum = 0;
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
+            factory.setProperty("javax.xml.stream.isCoalescing", true);
             XMLEventReader eventReader =
                     factory.createXMLEventReader(new FileReader(fileName));
 
@@ -71,13 +70,24 @@ public class XMLParser {
 
                         if (qName.equalsIgnoreCase("page")) {
                             page = new DocumentPage();
+                            page.setPageNumber(pageNum++);
                             Iterator<Attribute> attributes = startElement.getAttributes();
                             while(attributes.hasNext())
                             {
                                 Attribute attribute = attributes.next();
-                                switch (attribute.getName().toString()) {
+                                switch (attribute.getName().toString().toLowerCase()) {
                                     case "index" :
-                                        pageNum = attribute.getValue();
+                                        pageIndex = attribute.getValue();
+                                        page.setPageIndex(pageIndex);
+                                        if (pageNum == 0)
+                                            {
+                                                if (!pageIndex.equals("start") && !pageIndex.equals(""))
+                                                {
+                                                    rwdebug(2, "Page 0 index is not 'start' in document " + fileName);
+                                                    rwdebug(2, "Overriding so things don't break.");
+                                                    page.setPageIndex("start");
+                                                }
+                                            }
                                         break;
                                 }
                             }
@@ -89,17 +99,17 @@ public class XMLParser {
                             while(attributes.hasNext())
                             {
                                 Attribute attribute = attributes.next();
-                                switch (attribute.getName().toString()) {
+                                switch (attribute.getName().toString().toLowerCase()) {
                                     case "indent" :
                                         indent = attribute.getValue();
                                         break;
-                                    case "alignment" :
+                                    case "align" :
                                         alignment = attribute.getValue();
                                         break;
-                                    case "pageNum" :
-                                        pageNum = attribute.getValue();
+                                    case "index" :
+                                        pageIndex = attribute.getValue();
                                         break;
-                                    case "wrapText" :
+                                    case "wrap" :
                                         wrapText = attribute.getValue();
                                         break;
                                     case "color" :
@@ -119,14 +129,14 @@ public class XMLParser {
                             while(attributes.hasNext())
                             {
                                 Attribute attribute = attributes.next();
-                                switch (attribute.getName().toString()) {
+                                switch (attribute.getName().toString().toLowerCase()) {
                                     case "indent" :
                                         indent = attribute.getValue();
                                         break;
-                                    case "alignment" :
+                                    case "align" :
                                         alignment = attribute.getValue();
                                         break;
-                                    case "wrapText" :
+                                    case "wrap" :
                                         wrapText = attribute.getValue();
                                         break;
                                     case "posx" :
@@ -152,14 +162,14 @@ public class XMLParser {
                             while(attributes.hasNext())
                             {
                                 Attribute attribute = attributes.next();
-                                switch (attribute.getName().toString()) {
+                                switch (attribute.getName().toString().toLowerCase()) {
                                     case "indent" :
                                         indent = attribute.getValue();
                                         break;
-                                    case "alignment" :
+                                    case "align" :
                                         alignment = attribute.getValue();
                                         break;
-                                    case "wrapText" :
+                                    case "wrap" :
                                         wrapText = attribute.getValue();
                                         break;
                                     case "posx" :
@@ -185,14 +195,14 @@ public class XMLParser {
                             while(attributes.hasNext())
                             {
                                 Attribute attribute = attributes.next();
-                                switch (attribute.getName().toString()) {
+                                switch (attribute.getName().toString().toLowerCase()) {
                                     case "indent" :
                                         indent = attribute.getValue();
                                         break;
-                                    case "alignment" :
+                                    case "align" :
                                         alignment = attribute.getValue();
                                         break;
-                                    case "wrapText" :
+                                    case "wrap" :
                                         wrapText = attribute.getValue();
                                         break;
                                     case "posx" :
@@ -229,7 +239,6 @@ public class XMLParser {
                             element.setElementType("title");
                             element.setTextString(characters.getData());
                             page.addElement(element);
-                            rwdebug(1, "doctitle = " + element.getTextString());
                             document.setDocumentTitle(element.getTextString());
                             bTitle = false;
                             clearVars();
@@ -277,7 +286,8 @@ public class XMLParser {
                                 element.setWrapText(wrapText);
                             if(null != pivot)
                                 element.setPivot(pivot);
-                            element.setPageNumber(pageNum);
+                            element.setDocTitle(document.getDocumentTitle());
+                            element.setPageIndex(pageIndex);
                             element.setTextString(characters.getData());
                             page.addElement(element);
                             bMenuItem = false;
@@ -301,6 +311,8 @@ public class XMLParser {
                                 element.setWrapText(wrapText);
                             if(null != pivot)
                                 element.setPivot(pivot);
+                            if(null != indent)
+                                element.setIndent(indent);
                             element.setTextString(characters.getData());
                             page.addElement(element);
                             bText = false;
@@ -338,20 +350,22 @@ public class XMLParser {
                     case XMLStreamConstants.END_ELEMENT:
                         EndElement endElement = event.asEndElement();
                         if(endElement.getName().getLocalPart().equalsIgnoreCase("page")) {
+                            pageList.add(page);
                         }
-                        pageList.add(page);
                         break;
                 }
+
             }
+
         } catch (FileNotFoundException e) {
             rwdebug(2, "XML Parser, File not Found");
-            // e.printStackTrace();
+            e.printStackTrace();
         } catch (XMLStreamException e) {
-            rwdebug(2, "XML Parser: Stream Exception. WHAT ARE YOU DOING!?");
-            //e.printStackTrace();
+            rwdebug(2, "XML Parser: Stream Exception.");
+            e.printStackTrace();
         }
-        rwdebug(1, "Last chance to see: " + document.getDocumentTitle());
         document.setPageList(pageList);
+        document.setDocumentPath(fileName.substring(0,fileName.lastIndexOf(File.separator)));
         return document;
     }
 
@@ -361,7 +375,7 @@ public class XMLParser {
         posy = null;
         textColor = null;
         textSize = null;
-        pageNum = null;
+        pageIndex = null;
         imageFilename = null;
         imageWidth = null;
         imageHeight = null;

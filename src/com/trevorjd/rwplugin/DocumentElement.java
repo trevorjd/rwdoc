@@ -8,7 +8,7 @@ public class DocumentElement
     private String yPosition;
     private String textColor;
     private String textSize;
-    private String pageNumber;
+    // private String pageNumber;
     private String fileName;
     private String imageWidth;
     private String imageHeight;
@@ -18,6 +18,7 @@ public class DocumentElement
     private String imageFrame;
     private String wrapText;
     private String pivot;
+    private String pageIndex;
 
     public DocumentElement()
     {
@@ -34,10 +35,10 @@ public class DocumentElement
         this.textString = textString;
     }
 
-    public void setPageNumber(String pageNumber)
+/*    public void setPageNumber(String pageNumber)
     {
         this.pageNumber = pageNumber;
-    }
+    }*/
 
     public void setTextColor(String textColor)
     {
@@ -99,9 +100,14 @@ public class DocumentElement
     public void setPivot(String pivot)
     {
         this.pivot = pivot;
+}
+
+    public void setPageIndex(String pageIndex)
+    {
+        this.pageIndex = pageIndex;
     }
 
-    // getters
+// getters
 
     public String getxPosition()
     {
@@ -133,7 +139,7 @@ public class DocumentElement
         return textString;
     }
 
-    public String getPageNumber() { return pageNumber; }
+    /*public String getPageNumber() { return pageNumber; }*/
 
     public String getFileName()
     {
@@ -172,5 +178,10 @@ public class DocumentElement
     public String getPivot()
     {
         return pivot;
+    }
+
+    public String getPageIndex()
+    {
+        return pageIndex;
     }
 }
