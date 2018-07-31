@@ -440,7 +440,8 @@ public class XMLParser {
         if(document.getDocumentTitle() == null || document.getDocumentTitle().equals(""))
         {
             rwdebug(2, "File has no valid <title> element! " + fileName);
-            document.setDocumentTitle(rwdoc.c.getProperty("msg_untitled_document"));
+            File file = new File(fileName);
+            document.setDocumentTitle(rwdoc.c.getProperty("msg_untitled") + ": " + file.getParentFile().getName() );
         }
         return document;
     }

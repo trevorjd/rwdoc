@@ -199,22 +199,7 @@ public class rwdocGUI
             elementToInsert.setAlignment("center");
             page.addElement(elementToInsert);
         } else { page = document.getPagebyNumber(pageNumber); }
-/*        // add page numbering
-        GuiLabel pageNumLabelLeft = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelLeft");
-        GuiLabel pageNumLabelRight = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight");
-        if(document.getDocumentTitle().equals("default"))
-        {
-            // no numbers on the front page
-            pageNumLabelLeft.setText("");
-            pageNumLabelRight.setText("");
-        } else
-        {
-            if(pageNumber % 2 == 0)
-            {
-                pageNumLabelLeft.setText(String.valueOf(pageNumber + 1));
-            } else { pageNumLabelRight.setText(String.valueOf(pageNumber + 1)); }
-        }
-        */
+
         GuiLabel pageNumLabelLeft = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelLeft");
         GuiLabel pageNumLabelRight = (GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight");
         int pageNum = page.getPageNumber();
@@ -258,15 +243,22 @@ public class rwdocGUI
                     // don't process with attributeLabel(), adjust Y values, etc.
                     GuiLabel titleLeft = (GuiLabel) player.getAttribute("rwdoc_titleLeft");
                     GuiLabel titleRight = (GuiLabel) player.getAttribute("rwdoc_titleRight");
-                    if (!element.getTextString().equals("default"))
-                    {
-                        titleLeft.setText(cleanText(element.getTextString()));
-                        titleRight.setText(cleanText(element.getTextString()));
-                    } else
+                    if (element.getTextString().equals("default"))
                     {
                         titleLeft.setText(DEFAULT_TITLE);
                         titleRight.setText(DEFAULT_TITLE);
+                    } else
+                    if (page.isLegacyPage())
+                    {
+                        //create a notification if the document is untitled
+                        titleLeft.setText("This is a legacy journal.xml file.");
+                        titleRight.setText("Please update to use rwDoc format.");
+                    } else
+                    {
+                        titleLeft.setText(cleanText(element.getTextString()));
+                        titleRight.setText(cleanText(element.getTextString()));
                     }
+
                 }
 
                 if (elementType.equals("menuitem"))

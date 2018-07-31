@@ -65,7 +65,7 @@ import static com.trevorjd.rwplugin.rwdocGUI.setupMainGUI;
 public class rwdoc extends Plugin implements Listener
 {
     // Globals - hardwired
-    protected static String PLUGIN_VER = "0.1.2";
+    protected static String PLUGIN_VER = "0.1.3";
     protected static String REQUIRED_GAME_VER = "0.9.3";
     public static Properties c = null; // config options in here
     protected static rwdoc plugin;

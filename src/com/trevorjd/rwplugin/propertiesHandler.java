@@ -27,7 +27,7 @@ public class propertiesHandler
         config.setProperty("msg_server_outdated", cleanProperty(p,"msg_server_outdated"));
         config.setProperty("msg_plugin_outdated", cleanProperty(p,"msg_plugin_outdated"));
         config.setProperty("msg_library_refreshed", cleanProperty(p,"msg_library_refreshed"));
-        config.setProperty("msg_untitled_document", cleanProperty(p,"msg_untitled_document"));
+        config.setProperty("msg_untitled", cleanProperty(p,"msg_untitled"));
         config.setProperty("version_check_enabled", cleanProperty(p,"version_check_enabled"));
         config.setProperty("version_announcement_enabled", cleanProperty(p,"version_announcement_enabled"));
         config.setProperty("font_10pt_wrap_length", cleanProperty(p,"font_10pt_wrap_length"));
@@ -96,7 +96,7 @@ public class propertiesHandler
         p.setProperty("msg_library_refreshed", "rwDoc - Library refreshed.");
         p.setProperty("msg_server_outdated", "rwDoc requires your server software to be updated. Things may break.");
         p.setProperty("msg_plugin_outdated", "A newer version of rwDoc is available.");
-        p.setProperty("msg_untitled_document", "Untitled Document");
+        p.setProperty("msg_untitled", "Untitled");
 
         p.setProperty("version_check_enabled", "true");
         p.setProperty("version_announcement_enabled", "true");
