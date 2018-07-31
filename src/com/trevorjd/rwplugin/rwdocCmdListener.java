@@ -12,8 +12,10 @@ import net.risingworld.api.gui.GuiPanel;
 import net.risingworld.api.objects.Player;
 import net.risingworld.api.utils.KeyInput;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
+import static com.trevorjd.rwplugin.RwdocLibrary.getTitleList;
 import static com.trevorjd.rwplugin.rwdoc.*;
 import static java.lang.Math.max;
 import static com.trevorjd.rwplugin.RwdocLibrary.buildLibrary;
@@ -34,6 +36,7 @@ public class rwdocCmdListener implements Listener
             addCommonGuiToPlayer(player);
             refreshGUI(player);
             player.setMouseCursorVisible(true);
+            player.disableClientsideKeys(KeyInput.KEY_ESCAPE);
         }
 
         if (cmd[0].equals(REFRESH_CMD))
@@ -59,6 +62,22 @@ public class rwdocCmdListener implements Listener
                     EDITOR = true;
                 }
                 player.sendTextMessage(c.getProperty("msg_editor_mode"));
+            }
+        }
+
+        if (cmd[0].equals("/rwdocloglevel"))
+        {
+            player.sendTextMessage("changing log level");
+            LOGLEVEL = Integer.parseInt(cmd [1]);
+        }
+
+        if (cmd[0].equals("/rwdoclist"))
+        {
+            player.sendTextMessage("Showing doc list");
+            ArrayList<String> titleList = getTitleList();
+            for (String s : titleList)
+            {
+                rwdebug(3, s);
             }
         }
     }
@@ -120,6 +139,7 @@ public class rwdocCmdListener implements Listener
             setVisibility(player,false);
             clearGUI(player);
             player.setMouseCursorVisible(false);
+            player.enableClientsideKeys(KeyInput.KEY_ESCAPE);
         } else
 
         if (element == (GuiImage) player.getAttribute("rwdoc_button_up"))
@@ -174,6 +194,7 @@ public class rwdocCmdListener implements Listener
 
         // mouseclick didn't match any of the button elements, so it must be a menuitem GuiLabel
         {
+            rwdebug(3, "Player clicked a menuitem.");
             ArrayList<GuiLabel> guiLabelsMIH = (ArrayList<GuiLabel>) player.getAttribute("rwdoc_MIH_guilabels");
             ArrayList<String> docLinksMIH = (ArrayList<String>) player.getAttribute("rwdoc_MIH_doclinks");
             ArrayList<String> pageIndexMIH = (ArrayList<String>) player.getAttribute("rwdoc_MIH_pageindices");
@@ -191,6 +212,7 @@ public class rwdocCmdListener implements Listener
                         RwdocDocument requestedDocument = RWDOC_LIBRARY.getDocumentbyTitle(newDocTitle);
                         if (requestedDocument != null)
                         {
+                            rwdebug(3, "Requested document: " + requestedDocument);
                             //find the linked page and get its pagenum
                             String pageIndex = pageIndexMIH.get(count);
                             for (DocumentPage page : requestedDocument.getPageList())
@@ -232,7 +254,7 @@ public class rwdocCmdListener implements Listener
             }
             if(!foundMatch)
             {
-                rwdebug(2, "Invalid menuitem: " +
+                rwdebug(2, "Invalid menuitem in document: " +
                         String.valueOf(player.getAttribute("rwdoc_current_document"))
                         + " Page: " + String.valueOf(player.getAttribute("rwdoc_current_page")));
             }
@@ -244,11 +266,12 @@ public class rwdocCmdListener implements Listener
     public static void onPlayerKeyEvent(PlayerKeyEvent event)
     {
         Player player = event.getPlayer();
-        if(event.getKeyCode() == KeyInput.KEY_ESCAPE && event.isPressed())
+        if(event.getKeyCode() == KeyInput.KEY_ESCAPE)
         {
             setVisibility(player,false);
             clearGUI(player);
             player.setMouseCursorVisible(false);
+            player.enableClientsideKeys(KeyInput.KEY_ESCAPE);
         }
     }
 }

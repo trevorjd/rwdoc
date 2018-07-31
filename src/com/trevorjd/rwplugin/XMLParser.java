@@ -1,8 +1,6 @@
 package com.trevorjd.rwplugin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -22,6 +20,7 @@ import static net.risingworld.api.utils.Utils.StringUtils.isHex;
 public class XMLParser {
 
     private static DocumentPage page;
+    private static DocumentPage bufferPage = new DocumentPage();
 
     // bools for flagging during parsing
     private static boolean bTitle = false;
@@ -45,6 +44,11 @@ public class XMLParser {
     private static String imageFrame = null;
     private static String wrapText = "true";
     private static String pivot = null;
+    private static String charBuffer = "";
+    private static DocumentElement elementBuffer = new DocumentElement();
+    private static String legacyElement = null; // if a text or headline node contains a page attribute
+    // we need to build a second page and insert it
+
 
     public static RwdocDocument parseXMLFile(String fileName)
     {
@@ -56,8 +60,9 @@ public class XMLParser {
         try {
             XMLInputFactory factory = XMLInputFactory.newInstance();
             factory.setProperty("javax.xml.stream.isCoalescing", true);
+            InputStream inputStream = new FileInputStream(fileName);
             XMLEventReader eventReader =
-                    factory.createXMLEventReader(new FileReader(fileName));
+                    factory.createXMLEventReader(inputStream, "UTF-8");
 
             while(eventReader.hasNext()) {
                 XMLEvent event = eventReader.nextEvent();
@@ -70,7 +75,6 @@ public class XMLParser {
 
                         if (qName.equalsIgnoreCase("page")) {
                             page = new DocumentPage();
-                            page.setPageNumber(pageNum++);
                             Iterator<Attribute> attributes = startElement.getAttributes();
                             while(attributes.hasNext())
                             {
@@ -79,16 +83,18 @@ public class XMLParser {
                                     case "index" :
                                         pageIndex = attribute.getValue();
                                         page.setPageIndex(pageIndex);
-                                        if (pageNum == 0)
-                                            {
-                                                if (!pageIndex.equals("start") && !pageIndex.equals(""))
-                                                {
-                                                    rwdebug(2, "Page 0 index is not 'start' in document " + fileName);
-                                                    rwdebug(2, "Overriding so things don't break.");
-                                                    page.setPageIndex("start");
-                                                }
-                                            }
                                         break;
+                                }
+                            }
+                            // handle documents missing an index, or having an invalid index, on page 0
+                            rwdebug(3, "XMLParser: page=" + pageNum + " index=" + pageIndex);
+                            if (pageNum == 0)
+                            {
+                                if (pageIndex == null || (!pageIndex.equals("start") && !pageIndex.equals("")))
+                                {
+                                    rwdebug(2, "Page 0 index is not 'start' in document " + fileName);
+                                    rwdebug(2, "Overriding so things don't break.");
+                                    page.setPageIndex("start");
                                 }
                             }
                         } else if (qName.equalsIgnoreCase("title")) {
@@ -154,6 +160,9 @@ public class XMLParser {
                                     case "pivot" :
                                         pivot = attribute.getValue();
                                         break;
+                                    case "page" :
+                                        legacyElement = attribute.getValue();
+                                        break;
                                 }
                             }
                             bHeadline = true;
@@ -186,6 +195,9 @@ public class XMLParser {
                                         break;
                                     case "pivot" :
                                         pivot = attribute.getValue();
+                                        break;
+                                    case "page" :
+                                        legacyElement = attribute.getValue();
                                         break;
                                 }
                             }
@@ -264,7 +276,23 @@ public class XMLParser {
                             if(null != pivot)
                                 element.setPivot(pivot);
                             element.setTextString(characters.getData());
-                            page.addElement(element);
+                            if(null != legacyElement)
+                            {
+                                if(legacyElement.equalsIgnoreCase("right"))
+                                {
+                                    bufferPage.addElement(element);
+                                    bufferPage.setLegacyPage(true);
+                                } else
+                                if(legacyElement.equalsIgnoreCase("left"))
+                                {
+                                    page.addElement(element);
+                                    page.setLegacyPage(true);
+                                } else { rwdebug(3, "unknown legacyHeadline: " + legacyElement); }
+                            } else {
+                                // Not a legacy element; no special treatment required
+                                page.addElement(element);
+                            }
+
                             bHeadline = false;
                             clearVars();
                         }
@@ -294,29 +322,26 @@ public class XMLParser {
                             clearVars();
                         }
                         if(bText) {
-                            DocumentElement element = new DocumentElement();
-                            element.setElementType("text");
+                            //DocumentElement elementBuffer = new DocumentElement();
+                            elementBuffer.setElementType("text");
                             if(null != posx)
-                                element.setxPosition(posx);
+                                elementBuffer.setxPosition(posx);
                             if(null != posy)
-                                element.setyPosition(posy);
+                                elementBuffer.setyPosition(posy);
                             if(null != textColor)
-                                if(isHex(textColor)) { element.setTextColor(textColor); }
+                                if(isHex(textColor)) { elementBuffer.setTextColor(textColor); }
                                 else { rwdebug(2, "Invalid color attribute: " + textColor); }
                             if(null != textSize)
-                                element.setTextSize(textSize);
+                                elementBuffer.setTextSize(textSize);
                             if(null != alignment)
-                                element.setAlignment(alignment);
+                                elementBuffer.setAlignment(alignment);
                             if(null != wrapText)
-                                element.setWrapText(wrapText);
+                                elementBuffer.setWrapText(wrapText);
                             if(null != pivot)
-                                element.setPivot(pivot);
+                                elementBuffer.setPivot(pivot);
                             if(null != indent)
-                                element.setIndent(indent);
-                            element.setTextString(characters.getData());
-                            page.addElement(element);
-                            bText = false;
-                            clearVars();
+                                elementBuffer.setIndent(indent);
+                            charBuffer = charBuffer + characters.getData();
                         }
                         if(bImage) {
                             DocumentElement element = new DocumentElement();
@@ -347,12 +372,57 @@ public class XMLParser {
                         }
                         break;
 
+                    case XMLStreamConstants.COMMENT:
+                        break;
+
                     case XMLStreamConstants.END_ELEMENT:
                         EndElement endElement = event.asEndElement();
-                        if(endElement.getName().getLocalPart().equalsIgnoreCase("page")) {
-                            pageList.add(page);
+                        if(endElement.getName().getLocalPart().equalsIgnoreCase("text")) {
+                            elementBuffer.setTextString(charBuffer);
+                            if(legacyElement != null)
+                            {
+                                if(legacyElement.equalsIgnoreCase("right"))
+                                {
+                                    bufferPage.addElement(elementBuffer);
+                                    bufferPage.setLegacyPage(true);
+                                } else
+                                if(legacyElement.equalsIgnoreCase("left"))
+                                {
+                                    page.addElement(elementBuffer);
+                                    page.setLegacyPage(true);
+                                } else { rwdebug(3, "unknown legacyText " + legacyElement); }
+                            } else {
+                                //not a legacy element; no special treatment required
+                                page.addElement(elementBuffer);
+                            }
+                            bText = false;
+                            charBuffer = "";
+                            legacyElement = null;
+                            elementBuffer = new DocumentElement();
+                            clearVars();
                         }
+
+
+                        if(endElement.getName().getLocalPart().equalsIgnoreCase("page")) {
+                            rwdebug(3, "Setting pageNum: " + pageNum);
+                            if(bufferPage.isLegacyPage())
+                            {
+                                // insert both the page (left side page) and the bufferPage (right side page)
+                                page.setPageNumber(pageNum++);
+                                pageList.add(page);
+                                bufferPage.setPageNumber(pageNum++);
+                                pageList.add(bufferPage);
+                                bufferPage = new DocumentPage();
+                            } else
+                            {
+                                page.setPageNumber(pageNum++);
+                                pageList.add(page);
+                            }
+
+                        }
+
                         break;
+
                 }
 
             }
@@ -366,6 +436,12 @@ public class XMLParser {
         }
         document.setPageList(pageList);
         document.setDocumentPath(fileName.substring(0,fileName.lastIndexOf(File.separator)));
+        // handle documents w/o a title element, or where title is empty
+        if(document.getDocumentTitle() == null || document.getDocumentTitle().equals(""))
+        {
+            rwdebug(2, "File has no valid <title> element! " + fileName);
+            document.setDocumentTitle(rwdoc.c.getProperty("msg_untitled_document"));
+        }
         return document;
     }
 

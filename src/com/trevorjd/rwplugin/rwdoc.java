@@ -65,6 +65,8 @@ import static com.trevorjd.rwplugin.rwdocGUI.setupMainGUI;
 public class rwdoc extends Plugin implements Listener
 {
     // Globals - hardwired
+    protected static String PLUGIN_VER = "0.1.2";
+    protected static String REQUIRED_GAME_VER = "0.9.3";
     public static Properties c = null; // config options in here
     protected static rwdoc plugin;
     protected static boolean EDITOR; //plugin is in editor mode - show label borders
@@ -103,6 +105,8 @@ public class rwdoc extends Plugin implements Listener
     // Shared resources
     protected static RwdocLibrary RWDOC_LIBRARY;
     private static rwdocCmdListener CMD_LISTENER = new rwdocCmdListener();
+    protected static boolean UPTODATE = false;
+    protected static boolean COMPATIBLE = false;
 
     @Override
     public void onEnable(){
@@ -130,7 +134,12 @@ public class rwdoc extends Plugin implements Listener
         player.setAttribute("rwdoc_current_document", "default");
         player.setAttribute("rwdoc_current_page", "0");
         setupMainGUI(player);
-        //showTestGui(player);
+        //version announcements
+        if(VERSION_CHECKING && VERSION_ANNOUNCEMENT)
+        {
+            if(!UPTODATE) { player.sendTextMessage(c.getProperty("msg_plugin_outdated")); }
+            if(!COMPATIBLE) { player.sendTextMessage(c.getProperty("msg_server_outdated")); }
+        }
     }
 
     @EventMethod
@@ -138,8 +147,8 @@ public class rwdoc extends Plugin implements Listener
     {
         Player player = event.getPlayer();
         player.setAttribute("guiVisible", false);
-        player.setListenForKeyInput(true);
         player.registerKeys(KeyInput.KEY_ESCAPE);
+        player.setListenForKeyInput(true);
     }
 
 }

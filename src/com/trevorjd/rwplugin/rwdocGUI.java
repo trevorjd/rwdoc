@@ -16,7 +16,7 @@ import static com.trevorjd.rwplugin.rwdocUtils.wordWrap;
 
 public class rwdocGUI
 {
-    private static Float padding = 0.01f;
+    private static Float padding = 0.02f;
     /*
     give an array of document elements
     for each element:
@@ -168,21 +168,21 @@ public class rwdocGUI
         player.addGuiElement((GuiLabel) player.getAttribute("rwdoc_pageNumLabelRight"));
     }
 
+
     private static String cleanText(String inputString)
     {
-        String trimmed = "";
+        String cleaned = "";
         if(null != inputString)
         {
-            rwdebug(4, "inputString: " + inputString);
-            String pass1 = inputString.trim();
-            String newline = System.getProperty("line.separator");
-            // String pass1 = inputString.replace(newline, "");
-            String pass2 = pass1.replace("\t", "");
-            String pass3 = pass2.replace("\n", "");
-            trimmed = pass2.trim();
+            //rwdebug(3, "inputString: " + inputString);
+            String pass1 = inputString.trim(); //remove leading and trailing spaces
+            String pass2 = pass1.replace("\t", " ");
+            cleaned = pass2.trim().replaceAll(" +", " ");
         } else rwdebug(2, "cleanText received a null value! This shouldn't happen.");
-        return trimmed;
+        //rwdebug(3, "outputString: " + cleaned);
+        return cleaned;
     }
+
 
     public static void buildPage(GuiPanel panel, Player player, RwdocDocument document, int pageNumber)
     {
@@ -226,8 +226,7 @@ public class rwdocGUI
             if(pageNum == -1)
             {
                 pageNumLabelRight.setText("");
-            }
-                pageNumLabelRight.setText(String.valueOf(pageNum));
+            } else { pageNumLabelRight.setText(String.valueOf(pageNum)); }
         }
 
 
@@ -252,26 +251,81 @@ public class rwdocGUI
         {
             DocumentElement element = pageElements.get(count);
             String elementType = element.getElementType();
-            if (elementType.equals("title"))
-            {
-                // titles are a special case because they're not on the left/right panels
-                // don't process with attributeLabel(), adjust Y values, etc.
-                GuiLabel titleLeft = (GuiLabel) player.getAttribute("rwdoc_titleLeft");
-                GuiLabel titleRight = (GuiLabel) player.getAttribute("rwdoc_titleRight");
-                if (!element.getTextString().equals("default"))
+            if (elementType != null) {
+                if (elementType.equals("title"))
                 {
-                    titleLeft.setText(cleanText(element.getTextString()));
-                    titleRight.setText(cleanText(element.getTextString()));
-                } else
-                {
-                    titleLeft.setText(DEFAULT_TITLE);
-                    titleRight.setText(DEFAULT_TITLE);
+                    // titles are a special case because they're not on the left/right panels
+                    // don't process with attributeLabel(), adjust Y values, etc.
+                    GuiLabel titleLeft = (GuiLabel) player.getAttribute("rwdoc_titleLeft");
+                    GuiLabel titleRight = (GuiLabel) player.getAttribute("rwdoc_titleRight");
+                    if (!element.getTextString().equals("default"))
+                    {
+                        titleLeft.setText(cleanText(element.getTextString()));
+                        titleRight.setText(cleanText(element.getTextString()));
+                    } else
+                    {
+                        titleLeft.setText(DEFAULT_TITLE);
+                        titleRight.setText(DEFAULT_TITLE);
+                    }
                 }
-            }
 
-            if (elementType.equals("menuitem"))
-            {
-                if(element.getTextString() != null && !element.getTextString().isEmpty())
+                if (elementType.equals("menuitem"))
+                {
+                    if(element.getTextString() != null && !element.getTextString().isEmpty())
+                    {
+                        GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
+                        GuiLabel attribLabel = addLabelAttributes(element, label);
+                        String cleanText = cleanText(element.getTextString());
+                        if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
+                        {
+                            attribLabel.setText(cleanText);
+                        } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
+
+                        if (cmpF(current_Y_pos, attribLabel.getPositionY()))
+                        {
+                            current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
+                            attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
+                        }
+                        if (MENUITEM_BULLETS)
+                        {
+                            // create new GuiImage for bullet; shift the label across
+                            GuiImage imgBullet = new GuiImage(
+                                    BULLET,
+                                    attribLabel.getPositionX(),
+                                    attribLabel.getPositionY() + calcHeight(attribLabel) / 2,
+                                    true,
+                                    32,
+                                    32,
+                                    false
+                            );
+                            attribLabel.setPosition(attribLabel.getPositionX() + 0.075f, attribLabel.getPositionY(), true);
+                            imgBullet.setPivot(PivotPosition.CenterLeft);
+                            panel.addChild(imgBullet);
+                            player.addGuiElement(imgBullet);
+                            imgBullet.setClickable(true);
+                            imgBullet.setVisible(true);
+                            guiItems.add(imgBullet);
+                        }
+                        panel.addChild(attribLabel);
+                        player.addGuiElement(attribLabel);
+                        attribLabel.setClickable(true);
+                        attribLabel.setVisible(true);
+                        guiItems.add(attribLabel);
+                        // MIH is only needed for menu items
+                        if(!element.getTextString().isEmpty())
+                        {
+                            if (document.getDocumentTitle().equals("default"))
+                            {
+                                mih.addMenuItem(attribLabel.getText(), "start", attribLabel);
+                            } else
+                            {
+                                mih.addMenuItem(document.getDocumentTitle(), element.getPageIndex(), attribLabel);
+                            }
+                        }
+                    }
+
+                }
+                if (elementType.equals("headline"))
                 {
                     GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
                     GuiLabel attribLabel = addLabelAttributes(element, label);
@@ -280,166 +334,127 @@ public class rwdocGUI
                     {
                         attribLabel.setText(cleanText);
                     } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
-
                     if (cmpF(current_Y_pos, attribLabel.getPositionY()))
                     {
                         current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
                         attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
                     }
-                    if (MENUITEM_BULLETS)
+                    panel.addChild(attribLabel);
+                    player.addGuiElement(attribLabel);
+                    guiItems.add(attribLabel);
+                    attribLabel.setVisible(true);
+                }
+                if (elementType.equals("text"))
+                {
+                    GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
+                    GuiLabel attribLabel = addLabelAttributes(element, label);
+                    String cleanText = cleanText(element.getTextString());
+                    // if there are newlines in the text, consider it pre-formatted and do NOT wrap
+                    if(cleanText.contains(System.getProperty("line.separator")) || cleanText.contains("\n"))
                     {
-                        // create new GuiImage for bullet; shift the label across
-                        GuiImage imgBullet = new GuiImage(
-                                BULLET,
-                                attribLabel.getPositionX(),
-                                attribLabel.getPositionY() + calcHeight(attribLabel) / 2,
-                                true,
-                                32,
-                                32,
-                                false
-                        );
-                        attribLabel.setPosition(attribLabel.getPositionX() + 0.075f, attribLabel.getPositionY(), true);
-                        imgBullet.setPivot(PivotPosition.CenterLeft);
-                        panel.addChild(imgBullet);
-                        player.addGuiElement(imgBullet);
-                        imgBullet.setClickable(true);
-                        imgBullet.setVisible(true);
-                        guiItems.add(imgBullet);
+                        rwdebug(3, "Text contains newlines. Assuming pre-formatted text; turning off wrap.");
+                        element.setWrapText("false");
+                    }
+
+                    if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
+                    {
+                        attribLabel.setText(cleanText);
+                    } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
+                    if (cmpF(current_Y_pos, attribLabel.getPositionY()))
+                    {
+                        current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
+                        attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
                     }
                     panel.addChild(attribLabel);
                     player.addGuiElement(attribLabel);
-                    attribLabel.setClickable(true);
-                    attribLabel.setVisible(true);
                     guiItems.add(attribLabel);
-                    // MIH is only needed for menu items
-                    if(!element.getTextString().isEmpty())
+                    attribLabel.setVisible(true);
+                    // default journal sets a TopLeft pivot for text items; we must accommodate this
+                    // XML parser sets isLegacyPage() = true if the elements contain page="left" or page="right"
+                    if(page.isLegacyPage() && element.getPivot() == null)
                     {
-                        if (document.getDocumentTitle().equals("default"))
-                        {
-                            mih.addMenuItem(attribLabel.getText(), "start", attribLabel);
-                        } else
-                        {
-                            mih.addMenuItem(document.getDocumentTitle(), element.getPageIndex(), attribLabel);
+                        attribLabel.setPivot(PivotPosition.TopLeft);
+                    }
+                }
+                if (elementType.equals("image"))
+                {
+                    // clean the image filename in case someone tries to sneak in something nasty
+                    File file = new File(element.getFileName());
+                    String fileName = file.getName();
+                    // provide some common graphics for authors to use (saving memory)
+                    GuiImage image;
+                    switch (fileName.toLowerCase())
+                    {
+                        case "hrule" :
+                            image = new GuiImage(HRULE, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                            break;
+                        case "vrule" :
+                            image = new GuiImage(VRULE, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                            break;
+                        case "tick" :
+                            image = new GuiImage(TICK, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                            break;
+                        case "cross" :
+                            image = new GuiImage(CROSS, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                            break;
+                        case "bullet" :
+                            image = new GuiImage(BULLET, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                            break;
+                        default:
+                            String imagepath = document.getDocumentPath() + IMGDIR + fileName;
+                            ImageInformation imageinfo = new ImageInformation(imagepath);
+                            image = new GuiImage(imageinfo, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
+                    }
+                    GuiImage attribImage = addImageAttributes(element, image);
+                    if (cmpF(current_Y_pos, attribImage.getPositionY()))
+                    {
+                        current_Y_pos = current_Y_pos - attribImage.getHeight() - padding;
+                        attribImage.setPosition(attribImage.getPositionX(), current_Y_pos, true);
+                    }
+                    if (element.getImageFrame() != null)
+                    {
+                        // frame needed. Create the frame; make it a little bigger
+                        // dummy init that will be overwritten by the switch
+                        GuiImage imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
+                        switch (element.getImageFrame()) {
+                            case "1" :
+                                imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
+                                break;
+                            case "2" :
+                                imageFrame = new GuiImage(IMAGE_FRAME_2, 0f, 0f, true, 0f, 0f,false);
+                                break;
+                            case "3" :
+                                imageFrame = new GuiImage(IMAGE_FRAME_3, 0f, 0f, true, 0f, 0f,false);
+                                break;
+                            case "4" :
+                                imageFrame = new GuiImage(IMAGE_FRAME_4, 0f, 0f, true, 0f, 0f,false);
+                                break;
                         }
+                        imageFrame.setPosition(attribImage.getPositionX(), attribImage.getPositionY(), true);
+                        imageFrame.setSize(attribImage.getWidth(), attribImage.getHeight(), true);
+                        panel.addChild(imageFrame);
+                        player.addGuiElement(imageFrame);
+                        guiItems.add(imageFrame);
+                        imageFrame.setVisible(true);
+                        // stick the image on top of the frame, resize it to fit the frame, then the usual stuff
+                        imageFrame.addChild(attribImage);
+                        attribImage.setSize(0.90f, 0.90f, true);
+                        attribImage.setPosition(0.05f, 0.05f, true);
+                        player.addGuiElement(attribImage);
+                        guiItems.add(attribImage);
+                        attribImage.setVisible(true);
+                    } else
+                    {
+                        // no frame needed, business as usual
+                        panel.addChild(attribImage);
+                        player.addGuiElement(attribImage);
+                        guiItems.add(attribImage);
+                        attribImage.setVisible(true);
                     }
-                }
 
-            }
-            if (elementType.equals("headline"))
-            {
-                GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
-                GuiLabel attribLabel = addLabelAttributes(element, label);
-                String cleanText = cleanText(element.getTextString());
-                if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
-                {
-                    attribLabel.setText(cleanText);
-                } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
-                if (cmpF(current_Y_pos, attribLabel.getPositionY()))
-                {
-                    current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
-                    attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
                 }
-                panel.addChild(attribLabel);
-                player.addGuiElement(attribLabel);
-                guiItems.add(attribLabel);
-                attribLabel.setVisible(true);
-            }
-            if (elementType.equals("text"))
-            {
-                GuiLabel label = new GuiLabel("", 0f, current_Y_pos, true);
-                GuiLabel attribLabel = addLabelAttributes(element, label);
-                String cleanText = cleanText(element.getTextString());
-                if (element.getWrapText() != null && !Boolean.valueOf(element.getWrapText()))
-                {
-                    attribLabel.setText(cleanText);
-                } else { attribLabel.setText(wordWrap(cleanText, attribLabel.getFontSize())); }
-                if (cmpF(current_Y_pos, attribLabel.getPositionY()))
-                {
-                    current_Y_pos = current_Y_pos - calcHeight(attribLabel) - padding;
-                    attribLabel.setPosition(attribLabel.getPositionX(), current_Y_pos, true);
-                }
-                panel.addChild(attribLabel);
-                player.addGuiElement(attribLabel);
-                guiItems.add(attribLabel);
-                attribLabel.setVisible(true);
-            }
-            if (elementType.equals("image"))
-            {
-                // clean the image filename in case someone tries to sneak in something nasty
-                File file = new File(element.getFileName());
-                String fileName = file.getName();
-                // provide some common graphics for authors to use (saving memory)
-                GuiImage image;
-                switch (fileName.toLowerCase())
-                {
-                    case "hrule" :
-                        image = new GuiImage(HRULE, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                        break;
-                    case "vrule" :
-                        image = new GuiImage(VRULE, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                        break;
-                    case "tick" :
-                        image = new GuiImage(TICK, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                        break;
-                    case "cross" :
-                        image = new GuiImage(CROSS, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                        break;
-                    case "bullet" :
-                        image = new GuiImage(BULLET, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                        break;
-                    default:
-                        String imagepath = document.getDocumentPath() + IMGDIR + fileName;
-                        ImageInformation imageinfo = new ImageInformation(imagepath);
-                        image = new GuiImage(imageinfo, 0.0f, current_Y_pos, true, Float.parseFloat(element.getImageWidth()), Float.parseFloat(element.getImageHeight()), true);
-                }
-                GuiImage attribImage = addImageAttributes(element, image);
-                if (cmpF(current_Y_pos, attribImage.getPositionY()))
-                {
-                    current_Y_pos = current_Y_pos - attribImage.getHeight() - padding;
-                    attribImage.setPosition(attribImage.getPositionX(), current_Y_pos, true);
-                }
-                if (element.getImageFrame() != null)
-                {
-                    // frame needed. Create the frame; make it a little bigger
-                    // dummy init that will be overwritten by the switch
-                    GuiImage imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
-                    switch (element.getImageFrame()) {
-                        case "1" :
-                            imageFrame = new GuiImage(IMAGE_FRAME_1, 0f, 0f, true, 0f, 0f,false);
-                            break;
-                        case "2" :
-                            imageFrame = new GuiImage(IMAGE_FRAME_2, 0f, 0f, true, 0f, 0f,false);
-                            break;
-                        case "3" :
-                            imageFrame = new GuiImage(IMAGE_FRAME_3, 0f, 0f, true, 0f, 0f,false);
-                            break;
-                        case "4" :
-                            imageFrame = new GuiImage(IMAGE_FRAME_4, 0f, 0f, true, 0f, 0f,false);
-                            break;
-                    }
-                    imageFrame.setPosition(attribImage.getPositionX(), attribImage.getPositionY(), true);
-                    imageFrame.setSize(attribImage.getWidth(), attribImage.getHeight(), true);
-                    panel.addChild(imageFrame);
-                    player.addGuiElement(imageFrame);
-                    guiItems.add(imageFrame);
-                    imageFrame.setVisible(true);
-                    // stick the image on top of the frame, resize it to fit the frame, then the usual stuff
-                    imageFrame.addChild(attribImage);
-                    attribImage.setSize(0.90f, 0.90f, true);
-                    attribImage.setPosition(0.05f, 0.05f, true);
-                    player.addGuiElement(attribImage);
-                    guiItems.add(attribImage);
-                    attribImage.setVisible(true);
-                } else
-                {
-                    // no frame needed, business as usual
-                    panel.addChild(attribImage);
-                    player.addGuiElement(attribImage);
-                    guiItems.add(attribImage);
-                    attribImage.setVisible(true);
-                }
+            } else { rwdebug(3, "Element type is null. This is unusual."); }
 
-            }
         }
         player.setAttribute("rwdoc_gui_elements_" + panel.getID(), guiItems);
         assignToPlayer(player);
@@ -539,6 +554,7 @@ public class rwdocGUI
                     break;
             }
         }
+
         return egui;
     }
 
@@ -617,6 +633,11 @@ public class rwdocGUI
         float result = 0f;
         String input = label.getText();
         int count = input.split(sep,-1).length-1 + 1;
+        if ( count == 1)
+        {
+            count = input.split("\n",-1).length-1 + 1;
+        }
+
         rwdebug(4,"calcHeight found " + count + " newlines in " + label.getText());
         result = (float) count * label.getFontSize() / 660;
         return result;

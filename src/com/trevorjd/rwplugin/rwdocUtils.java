@@ -3,7 +3,11 @@ package com.trevorjd.rwplugin;
 import net.risingworld.api.Plugin;
 import net.risingworld.api.utils.ImageInformation;
 
-import java.io.File;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.URL;
+import java.util.Properties;
+import java.util.Scanner;
 
 import static com.trevorjd.rwplugin.rwdoc.*;
 
@@ -43,6 +47,8 @@ public class rwdocUtils
         DEFAULT_MENUITEM_SIZE = Integer.parseInt(c.getProperty("text_size_menuitem"));
         DEFAULT_TEXT_SIZE = Integer.parseInt(c.getProperty("text_size_text"));
         MENUITEM_BULLETS = Boolean.valueOf(c.getProperty("menuitem_bullets"));
+        VERSION_CHECKING = Boolean.valueOf(c.getProperty("version_check_enabled"));
+        VERSION_ANNOUNCEMENT = Boolean.valueOf(c.getProperty("version_announcement_enabled"));
 
         rwdoc.RWDOC_LIBRARY = new RwdocLibrary();
 
@@ -53,6 +59,19 @@ public class rwdocUtils
         else {
             rwdebug(2, "Failed to load config & failed to create a new config file.");
         }
+
+        COMPATIBLE = compatibilityCheck();
+        if(!COMPATIBLE)
+        {
+            rwdebug(2, "rwDoc requires your server software to be updated. Things may break!");
+        }
+
+        UPTODATE = versionCheck(); // players will be notified on login if notifications enabled
+        if(!UPTODATE)
+        {
+            rwdebug(2, "A newer version of rwDoc is available!");
+        } else { rwdebug(3, "rwDoc is up to date."); }
+
         return success;
     }
 
@@ -64,6 +83,88 @@ public class rwdocUtils
         else
             result = false;
         return result;
+    }
+
+    private static boolean versionCheck()
+    {
+        boolean upToDate = false;
+        Properties p = getVersionFile();
+        int test = versionCompare(p.getProperty("plugin_version"), PLUGIN_VER);
+        if(test > 0)
+        {
+            // a newer version of this plugin is available
+            upToDate = false;
+        } else { upToDate = true; }
+        return upToDate;
+    }
+
+    private static boolean compatibilityCheck()
+    {
+        boolean compatible = false;
+        String gameVersion = plugin.getServer().getVersion();
+        int test = versionCompare(REQUIRED_GAME_VER, gameVersion);
+        if (test >= 0)
+        {
+            // RequiredGameVersion is newer than the current server version
+            compatible = false;
+        } else { compatible = true; }
+        return compatible;
+    }
+
+    public static int versionCompare(String str1, String str2) {
+        // returns 0 if input is the same
+        // returns 1 if str1 is higher
+        // returns -1 is str2 is higher
+        try (Scanner s1 = new Scanner(str1);
+             Scanner s2 = new Scanner(str2);) {
+            s1.useDelimiter("\\.");
+            s2.useDelimiter("\\.");
+
+            while (s1.hasNextInt() && s2.hasNextInt()) {
+                int v1 = s1.nextInt();
+                int v2 = s2.nextInt();
+                if (v1 < v2) {
+                    return -1;
+                } else if (v1 > v2) {
+                    return 1;
+                }
+            }
+
+            if (s1.hasNextInt() && s1.nextInt() != 0)
+                return 1; //str1 has an additional lower-level version number
+            if (s2.hasNextInt() && s2.nextInt() != 0)
+                return -1; //str2 has an additional lower-level version
+
+            return 0;
+        } // end of try-with-resources
+    }
+
+    private static Properties getVersionFile()
+    {
+        Properties p = new Properties();
+        try {
+            URL url = new URL("https://raw.githubusercontent.com/trevorjd/rwdoc/master/src/version.properties?raw=true");
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+            con.setConnectTimeout(5000);
+            con.setReadTimeout(5000);
+            con.setRequestMethod("GET");
+            int status = con.getResponseCode();
+
+            if (con != null)
+            {
+                Reader reader = new InputStreamReader(con.getInputStream(), "UTF-8"); // for example
+                try {
+                    p.load(reader);
+                } finally {
+                    reader.close();
+                }
+            }
+            con.disconnect();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return p;
     }
 
     public static void rwdebug(int logLevel, String message)

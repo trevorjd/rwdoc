@@ -9,6 +9,7 @@ public class DocumentPage
     private int pageNumber = -1;
     private String pageIndex;
     private ArrayList<DocumentElement> elementList = new ArrayList<>();
+    private boolean legacyPage;
 
     public DocumentPage(int pageNum, ArrayList<DocumentElement> elements)
     {
@@ -43,6 +44,11 @@ public class DocumentPage
         this.pageIndex = pageIndex;
     }
 
+    public void setLegacyPage(boolean legacyPage)
+    {
+        this.legacyPage = legacyPage;
+    }
+
     //getters
     public int getPageNumber()
     {
@@ -69,5 +75,10 @@ public class DocumentPage
     public String getPageIndex()
     {
         return pageIndex;
+    }
+
+    public boolean isLegacyPage()
+    {
+        return legacyPage;
     }
 }

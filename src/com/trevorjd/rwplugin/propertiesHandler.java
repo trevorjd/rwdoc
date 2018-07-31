@@ -24,7 +24,12 @@ public class propertiesHandler
         config.setProperty("msg_no_content", cleanProperty(p,"msg_no_content"));
         config.setProperty("msg_no_default_document", cleanProperty(p,"msg_no_default_document"));
         config.setProperty("msg_editor_mode", cleanProperty(p,"msg_editor_mode"));
+        config.setProperty("msg_server_outdated", cleanProperty(p,"msg_server_outdated"));
+        config.setProperty("msg_plugin_outdated", cleanProperty(p,"msg_plugin_outdated"));
         config.setProperty("msg_library_refreshed", cleanProperty(p,"msg_library_refreshed"));
+        config.setProperty("msg_untitled_document", cleanProperty(p,"msg_untitled_document"));
+        config.setProperty("version_check_enabled", cleanProperty(p,"version_check_enabled"));
+        config.setProperty("version_announcement_enabled", cleanProperty(p,"version_announcement_enabled"));
         config.setProperty("font_10pt_wrap_length", cleanProperty(p,"font_10pt_wrap_length"));
         config.setProperty("font_15pt_wrap_length", cleanProperty(p,"font_15pt_wrap_length"));
         config.setProperty("font_20pt_wrap_length", cleanProperty(p,"font_20pt_wrap_length"));
@@ -80,7 +85,8 @@ public class propertiesHandler
         p.setProperty("activation_command", "help");
         p.setProperty("refresh_command", "rwdocrefresh");
         p.setProperty("search_all_plugins", "true");
-        p.setProperty("log_level", "3");
+        p.setProperty("log_level", "2");
+
         p.setProperty("editor_command", "rwdoceditor");
         p.setProperty("editor_enabled", "true");
         p.setProperty("refresh_enabled", "true");
@@ -88,6 +94,13 @@ public class propertiesHandler
         p.setProperty("msg_no_default_document", "No default document found.");
         p.setProperty("msg_editor_mode", "Toggled editor highlighting.");
         p.setProperty("msg_library_refreshed", "rwDoc - Library refreshed.");
+        p.setProperty("msg_server_outdated", "rwDoc requires your server software to be updated. Things may break.");
+        p.setProperty("msg_plugin_outdated", "A newer version of rwDoc is available.");
+        p.setProperty("msg_untitled_document", "Untitled Document");
+
+        p.setProperty("version_check_enabled", "true");
+        p.setProperty("version_announcement_enabled", "true");
+
         p.setProperty("font_10pt_wrap_length", "112");
         p.setProperty("font_15pt_wrap_length", "76");
         p.setProperty("font_20pt_wrap_length", "55");
@@ -104,6 +117,7 @@ public class propertiesHandler
         p.setProperty("text_size_headline", "30");
         p.setProperty("text_size_menuitem", "40");
         p.setProperty("text_size_text", "20");
+
         p.setProperty("menuitem_bullets", "true");
 
         return p;

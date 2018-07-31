@@ -19,6 +19,7 @@ public class DocumentElement
     private String wrapText;
     private String pivot;
     private String pageIndex;
+    private boolean rightSide;
 
     public DocumentElement()
     {
@@ -107,7 +108,12 @@ public class DocumentElement
         this.pageIndex = pageIndex;
     }
 
-// getters
+    public void setRightSide(boolean rightSide)
+    {
+        this.rightSide = rightSide;
+    }
+
+    // getters
 
     public String getxPosition()
     {
@@ -183,5 +189,10 @@ public class DocumentElement
     public String getPageIndex()
     {
         return pageIndex;
+    }
+
+    public boolean isRightSide()
+    {
+        return rightSide;
     }
 }
