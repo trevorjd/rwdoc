@@ -1,6 +1,6 @@
 name: rwdoc
 main: com.trevorjd.rwplugin.rwdoc
-version: 0.1.3
+version: 0.1.4
 author: "Trevor J Dixon"
 description: "In-game documentation plugin for Rising World"
 license: MIT
